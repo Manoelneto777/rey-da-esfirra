@@ -5,11 +5,11 @@
  * Edite as constantes abaixo conforme seu XAMPP.
  */
 
-define('DB_HOST', '127.0.0.1');
+define('DB_HOST', '');
 define('DB_USER', 'root');   // padrão XAMPP
 define('DB_PASS', '');       // padrão XAMPP (sem senha)
 define('DB_NAME', 'reydaesfirra_chatbot');
-define('DB_PORT', 3307);
+define('DB_PORT', 3306);
 
 /**
  * Retorna uma conexão mysqli reutilizável.
