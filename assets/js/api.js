@@ -7,7 +7,7 @@
 
 const Api = (() => {
   /** Prefixo do backend — ajuste se mudar o host */
-  const BASE = "http://localhost/reydaesfirra-chatbot/backend";
+  const BASE = "http://localhost:8080/rei-esfirra-novo/backend/";
 
   /**
    * Busca produtos, com filtro opcional de categoria.

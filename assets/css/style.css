@@ -581,6 +581,7 @@ button {
   margin-bottom: 20px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -1644,4 +1645,16 @@ a.whatsapp-float:hover {
 /* Esconde o balão quando o chat estiver aberto */
 #chatbotWindow.open ~ .chat-label {
   display: none;
+}
+
+/* Torna a janela do chatbot "atravessável" pelo mouse quando estiver fechada */
+#chatbotWindow {
+  pointer-events: none !important;
+  visibility: hidden; /* Garante que o navegador não processe a caixa invisível */
+}
+
+/* Devolve a solidez e a visibilidade à janela APENAS quando ela for aberta (classe .open) */
+#chatbotWindow.open {
+  pointer-events: auto !important;
+  visibility: visible;
 }
