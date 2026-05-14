@@ -1,0 +1,12 @@
+# Ignorar dependências do Composer
+/vendor/
+
+# Ignorar arquivos de ambiente que contém senhas
+.env
+
+# Ignorar arquivos de configuração de IDEs
+.vscode/
+.idea/
+
+# (Opcional) Arquivo específico de conexão que tenha senhas
+/backend/core/Config.php
