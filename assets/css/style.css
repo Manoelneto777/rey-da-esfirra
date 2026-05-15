@@ -1658,3 +1658,86 @@ a.whatsapp-float:hover {
   pointer-events: auto !important;
   visibility: visible;
 }
+
+/* CHATBOT - Overrides isolados */
+
+#chatbotWindow.chatbot-window,
+#chatbotWindow .chatbot-window,
+#chatbotWindow {
+  width: 360px !important;
+  height: 500px !important;
+}
+
+/* Mensagens */
+#chatbotWindow .chat-messages,
+#chatbotWindow .msg.bot,
+#chatbotWindow .msg.user,
+#chatbotWindow .msg-botoes,
+#chatbotWindow .msg-btn {
+  box-sizing: border-box !important;
+}
+
+#chatbotWindow .msg.bot {
+  background: #f9f9f9 !important;
+  color: #2d2d2d !important;
+  border: 1px solid #e0e0e0 !important;
+
+  /* balão: superiores arredondados maiores e “canto de cauda” */
+  border-radius: 12px 12px 12px 4px !important;
+
+  /* garante o “alinhamento” do balão */
+  align-self: flex-start !important;
+}
+
+#chatbotWindow .msg.user {
+  background: #d91a2a !important;
+  color: #ffffff !important;
+
+  /* balão invertido: cauda para o lado oposto */
+  border-radius: 12px 12px 4px 12px !important;
+
+  align-self: flex-end !important;
+}
+
+/* Botões de opções rápidas */
+#chatbotWindow .msg-btn {
+  background: #ffffff !important;
+  color: #d91a2a !important;
+  border: 1px solid #d91a2a !important;
+  border-radius: 9999px !important;
+
+  padding: 8px 14px !important;
+  font-weight: 700 !important;
+
+  transition:
+    transform 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease !important;
+}
+
+/* Hover: fundo vermelho e texto branco + leve subida */
+#chatbotWindow .msg-btn:hover {
+  background: #d91a2a !important;
+  color: #ffffff !important;
+  transform: none !important;
+  line-height: 1.5 !important; /* Dá espaço entre as linhas de texto */
+  font-size: 0.95rem !important; /* Tamanho confortável para leitura */
+  padding: 12px 15px !important; /* Dá um "ar" dentro do balão */
+}
+
+/* Container de botões à prova de quebra de layout */
+#chatbotWindow .msg-botoes {
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 8px !important;
+  width: 100% !important; 
+  padding-right: 5px !important; /* Cria uma margem de segurança longe da barra de rolagem */
+  box-sizing: border-box !important;
+}
+
+#chatbotWindow .msg-btn {
+  flex: 0 0 auto !important; /* Impede o botão de esticar ou encolher sozinho */
+  margin: 0 !important; 
+  transform: none !important; /* Trava animações que causam tremulação */
+  word-break: keep-all !important; /* Evita que a palavra se quebre ao meio */
+}

@@ -106,7 +106,7 @@ const Cardapio = (() => {
       card.style.animationDelay = `${i * 0.04}s`;
       card.innerHTML = `
         <div class="produto-img-wrap">
-          <img src="assets/images/${p.imagem}" alt="${p.nome}" loading="lazy" onerror="this.src='assets/images/carne.webp'">
+          <img src="assets/images/${p.imagem}" alt="${p.nome}" loading="lazy" onerror="this.src='assets/images/carne.svg'">
           <div class="produto-img-overlay"></div>
           <div class="produto-preco-overlay">R$ ${preco}</div>
         </div>
