@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Rey da Esfirra 👑 — A melhor do Recôncavo</title>
+  <meta name="description" content="A melhor esfirra de Capoeiruçu. Massa artesanal, recheio caprichado e entrega rápida. Peça agora!" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="assets/css/style.css?v=10" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+
+<nav class="navbar" id="navbar">
+  <div class="nav-inner">
+    <a href="#" class="logo"> 
+      <div class="logo-icon"><img src="assets/images/logo.png" alt="Logo Rei da Esfirra"></div>
+      <span class="logo-text">Rei da <span>Esfirra</span></span>
+    </a>
+    <ul class="nav-links" id="navLinks">
+      <li><a href="#inicio"   class="nav-link">Início</a></li>
+      <li><a href="#cardapio" class="nav-link">Cardápio</a></li>
+      <li><a href="#sobre"    class="nav-link">Sobre Nós</a></li>
+      <li><a href="#contato"  class="nav-link">Contato</a></li>
+    </ul>
+    <div class="nav-right">
+      <button class="cart-btn" id="cartToggle" aria-label="Abrir carrinho">
+        🛒 Meu Pedido <span class="cart-badge" id="cartBadge">0</span>
+      </button>
+      <button class="hamburger" id="hamburger" aria-label="Menu">☰</button>
+    </div>
+  </div>
+</nav>
+
+
+
+  <section class="hero-video" id="inicio">
+  <video autoplay loop muted playsinline class="bg-video">
+    <source src="assets/videos/fundo-esfirra.mp4" type="video/mp4">
+  </video>
+  
+  <div class="video-overlay"></div>
+
+  <div class="hero-content">
+   
+  </div>
+
+  <div class="categorias-sobre-video" id="categoriasScroll">
+    <div class="categorias-inner" id="categoriasInner">
+      <button class="cat-pill active" data-cat="Todos">Cardápio Completo</button>
+      <button class="cat-pill" data-cat="Tradicionais">Tradicionais</button>
+      <button class="cat-pill" data-cat="Especiais">Especiais</button>
+      <button class="cat-pill" data-cat="Premium">Premium</button>
+      <button class="cat-pill" data-cat="Doces">Doces</button>
+      <button class="cat-pill" data-cat="Combos">Combos da Galera</button>
+      <button class="cat-pill" data-cat="Bebidas">Bebidas</button>
+    </div>
+  </div>
+</section>
+
+
+<section class="cardapio" id="cardapio">
+  <div class="container">
+    <div class="cardapio-header">
+      <div>
+        <div class="section-eyebrow">Direto do Forno</div>
+        <h2 class="section-title">Nosso <span class="gold" style="color: var(--red-brand);">Cardápio</span></h2>
+        <div class="cardapio-count" id="cardapioCount">Carregando opções...</div>
+      </div>
+    </div>
+    <div class="produtos-grid" id="produtosGrid">
+      <div class="loading-state">
+        <div class="spinner"></div>
+        <span>Preparando o cardápio...</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="cta-banner">
+  <div class="cta-banner-bg"></div>
+  <div class="container">
+    <div class="cta-inner">
+      <div class="cta-text">
+        <h2>Bateu a fome? Não perca tempo!</h2>
+        <p>Pedido mínimo de R$ 25,00 · Entregamos rápido em toda região de Cachoeira e Capoeiruçu.</p>
+      </div>
+      <div class="cta-chips">
+        <div class="cta-chip">🛵 Delivery 30–50 min</div>
+        <div class="cta-chip">💳 Aceitamos PIX e Cartões</div>
+      </div>
+      <a href="#cardapio" class="btn btn-primary" style="background: #ffffff; color: var(--red-brand);">Fazer Pedido Agora</a>
+    </div>
+  </div>
+</section>
+
+<section class="sobre" id="sobre">
+  <div class="container">
+    <div class="sobre-layout">
+      <div class="sobre-text">
+        <div class="section-eyebrow">A Nossa História</div>
+        <h2 class="section-title">Feito com paixão,<br>servido com orgulho.</h2>
+        <div class="sobre-divider"></div>
+        <p>Desde 2015, o Rei da Esfirra é o ponto de encontro e a salvação das noites em Capoeiruçu. Começamos pequenos, mas com uma receita de massa que conquistou todo mundo pela leveza e sabor.</p>
+        <p>Hoje, atendemos milhares de clientes toda semana, sempre mantendo a pegada artesanal: ingredientes frescos comprados no dia e forno a lenha estalando.</p>
+        <div class="feat-grid">
+          <div class="feat-item">
+            <div class="feat-copy"><strong>Ingredientes Frescos</strong><small>Qualidade lá em cima, com insumos comprados diariamente.</small></div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-copy"><strong>Forno a Lenha</strong><small>Aquele sabor defumado e inconfundível que só a gente tem.</small></div>
+          </div>
+          <div class="feat-item">
+            <div class="feat-copy"><strong>Delivery a Jato</strong><small>Chega quentinho na sua porta. Rapidez é nosso forte.</small></div>
+          </div>
+        </div>
+      </div>
+      <div class="sobre-vitrine">
+        <div class="sobre-center" style="font-family: var(--font-display); font-size: 3.5rem; text-align: center; line-height: 1.2;">
+          Desde<br>2015
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="reviews">
+  <div class="container">
+    <div class="section-center">
+      <div class="section-eyebrow">A Galera Curte</div>
+      <h2 class="section-title">O que dizem <span class="gold" style="color: var(--red-brand);">sobre nós</span></h2>
+    </div>
+    <div class="reviews-grid">
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Salvou minha noite pós-prova! Pedimos lá pro internato e chegou rapidão, tudo quentinho. A de carne com queijo é barril!"</p>
+        <div class="review-author">
+          <div><div class="review-name">Lucas T.</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Rapaz, melhor custo-benefício de Capoeiruçu. A gente sempre racha o combo de 20 aqui na república, não sobra uma pra contar história."</p>
+        <div class="review-author">
+          <div><div class="review-name">Pedro H.</div></div>
+        </div>
+      </div>
+      <div class="review-card">
+        <div class="review-stars">★★★★★</div>
+        <p class="review-text">"Sou cliente desde 2018. A massa derrete na boca e nunca vem encharcada de óleo. O motoboy também é sempre gente boa."</p>
+        <div class="review-author">
+          <div><div class="review-name">Mariana S.</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="contato" id="contato">
+  <div class="container">
+    <div class="section-center">
+      <div class="section-eyebrow">Onde Estamos</div>
+      <h2 class="section-title">Venha nos <span class="gold" style="color: var(--red-brand);">visitar</span></h2>
+    </div>
+    <div class="contato-layout">
+      <div class="info-list">
+        <div class="info-item">
+          <div class="info-copy"><strong>Endereço</strong><p>Avenida Principal, 580 — Centro<br>Capoeiruçu — Bahia</p></div>
+        </div>
+        <div class="info-item">
+          <div class="info-copy"><strong>Horário de Funcionamento</strong><p>Seg–Qui: 13h às 22:30h<br>Sex–Sáb: 13h às 23h<br>Dom: 13h às 22h</p></div>
+        </div>
+        <div class="info-item">
+          <div class="info-copy"><strong>WhatsApp</strong><p>(75) 99999-0000</p></div>
+        </div>
+      </div>
+
+<div class="mapa-card">
+    <iframe
+    src= "https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d495.6516239501447!2d-38.97243216896671!3d-12.56744173763899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1spt-BR!2sbr!4v1777948763879!5m2!1spt-BR!2sbr" 
+    width="100" 
+    height="100" 
+    style="border:0; border-radius: 12px;" 
+    allowfullscreen="" 
+    loading="lazy"  
+    referrerpolicy="no-referrer-when-downgrade">
+  </iframe>
+</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <a href="#" class="logo">
+          <div class="logo-icon"><img src="assets/images/logo.png" alt="Logo Rey da Esfirra"></div>
+          <span class="logo-text">Rey da <span>Esfirra</span></span>
+        </a>
+        <p class="footer-brand-desc">A melhor esfirra de Capoeiruçu. Qualidade, sabor e entrega a jato desde 2015.</p>
+        <div class="footer-socials">
+       <a class="social-btn instagram" href="https://www.instagram.com/reydaesfirrareconcavo/" target="_blank" aria-label="Instagram">
+    <i class="fab fa-instagram"></i>
+    <span>Instagram</span>
+  </a>
+  <a class="social-btn whatsapp" href="https://wa.me/5575999990000" target="_blank" aria-label="WhatsApp">
+    <i class="fab fa-whatsapp"></i>
+    <span>WhatsApp</span>
+  </a>
+</div>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Navegação</div>
+        <a class="footer-link" href="#inicio">Início</a>
+        <a class="footer-link" href="#cardapio">Cardápio</a>
+        <a class="footer-link" href="#sobre">Sobre Nós</a>
+        <a class="footer-link" href="#contato">Contato</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Categorias</div>
+        <a class="footer-link" href="#cardapio">Tradicionais</a>
+        <a class="footer-link" href="#cardapio">Premium</a>
+        <a class="footer-link" href="#cardapio">Combos</a>
+      </div>
+      <div class="footer-col">
+        <div class="footer-col-title">Atendimento</div>
+        <span class="footer-link">Todos os dias a partir das 13h</span>
+        <div class="footer-col-title" style="margin-top:14px">Pagamento</div>
+        <span class="footer-link">PIX · Cartões · Dinheiro</span>
+      </div>
+    </div>
+  </div>
+  <div class="footer-bottom container">
+    <span>© 2026 Rei da Esfirra. Todos os direitos reservados.</span>
+    <span>Capoeiruçu - BA</span>
+  </div>
+</footer>
+
+<div class="cart-overlay" id="cartOverlay"></div>
+<aside class="cart-sidebar" id="cartSidebar" aria-label="Carrinho de compras">
+  <div class="cart-header">
+    <div>
+      <h3>Seu Pedido</h3>
+      <div class="cart-header-sub" id="cartHeaderSub">Aguardando itens...</div>
+    </div>
+    <button class="cart-close" id="cartClose" aria-label="Fechar carrinho">✕</button>
+  </div>
+  <div class="cart-items" id="cartItems">
+    </div>
+  <div class="cart-footer" id="cartFooter" style="display:none">
+    <div class="cart-promo">
+      <span>Frete grátis em pedidos acima de R$ 60!</span>
+    </div>
+    <div class="cart-subtotal">
+      <span>Subtotal</span><span id="subtotalValue">R$ 0,00</span>
+    </div>
+    <div class="cart-entrega">
+      <span>Taxa de Entrega</span><span id="entregaValue">R$ 5,00</span>
+    </div>
+    <div class="cart-total-row">
+      <span>Total</span><span id="totalValue">R$ 5,00</span>
+    </div>
+    
+    <button class="btn btn-primary w-full" id="abrirModal" onclick="CartUI.finalizarPedido()">
+  Finalizar Pedido →
+</button>
+
+<a href="index.html" class="btn-voltar-compras" id="btnVoltarCompras" type="submit">
+      ← Continuar Comprando
+      
+    </a>
+    </a>
+    </a>
+  </div>
+</aside>
+
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-label="Finalizar pedido">
+  <div class="modal">
+    <div class="modal-header">
+      <h3>Concluir Pedido</h3>
+      <button class="modal-close" id="fecharModal" aria-label="Fechar">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="resumo-box" id="resumoPedido"></div>
+
+      <div class="form-field">
+        <label for="pedidoNome">Nome Completo *</label>
+        <input type="text" id="pedidoNome" placeholder="Seu nome" autocomplete="name" />
+      </div>
+      <div class="form-field">
+        <label for="pedidoTelefone">WhatsApp *</label>
+        <input type="tel" id="pedidoTelefone" placeholder="(75) 99999-9999" autocomplete="tel" />
+      </div>
+      <div class="form-field">
+        <label for="pedidoEndereco">Endereço de Entrega *</label>
+        <input type="text" id="pedidoEndereco" placeholder="Rua, número, bairro" autocomplete="street-address" />
+      </div>
+      <div class="form-field">
+        <label for="pedidoObs">Observações (Sabores dos Sucos)</label>
+        <textarea id="pedidoObs" placeholder="Ex: Suco de Maracujá, tirar cebola, troco para 50..."></textarea>
+      </div>
+      <button class="btn btn-primary w-full" id="btnEnviarPedido">
+        Enviar Pedido pro Zap
+      </button>
+    </div>
+  </div>
+</div>
+
+<a href="https://wa.me/5575999990000?text=Olá!%20Vim%20pelo%20site%20e%20quero%20fazer%20um%20pedido."
+   class="whatsapp-float" target="_blank" rel="noopener" aria-label="WhatsApp">
+  <svg viewBox="0 0 24 24" fill="currentColor" width="30" height="30">
+    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+  </svg>
+</a>
+
+<div class="chatbot-widget" id="chatbotWidget">
+  <div class="chat-label">Posso ajudar?</div>
+
+  <button class="chatbot-toggle" id="chatbotToggle" aria-label="Abrir chat">
+    <span id="chatIconOpen">👑</span>
+    <span id="chatIconClose" style="display:none; font-weight:900; font-size:1rem">✕</span>
+    <div class="chat-ping"></div>
+  </button>
+
+  <div class="chatbot-window" id="chatbotWindow" role="dialog" aria-label="Chat com Rei Bot">
+    <div class="chat-header">
+      <div class="chat-avatar" style="background: #ffffff; color: var(--red-brand); border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;">👑</div>
+      <div class="chat-info">
+        <strong>Rei Bot</strong>
+        <small>Online agora</small>
+      </div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="chat-input-area">
+      <input type="text" class="chat-input" id="chatInput" placeholder="Digite sua mensagem..." autocomplete="off" />
+      <button class="chat-send" id="chatSend" aria-label="Enviar">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/>
+        </svg>
+      </button>
+    </div>
+  </div> </div>
+
+
+<div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+<script src="assets/js/api.js"></script>
+<script src="assets/js/cart.js"></script>
+<script src="assets/js/pedido.js"></script>
+<script src="assets/js/app.js?v=2"></script>
+<script src="assets/js/chatbot.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+      if (typeof ReiBot !== 'undefined') {
+          ReiBot.init();
+      }
+  });
+</script>
+
+</body>
+</html>
