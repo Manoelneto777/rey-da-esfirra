@@ -138,55 +138,77 @@ function respostaPadrao(): array
  * @param  string $mensagem  Mensagem do usuario
  * @return string|null       Resposta da IA ou null em caso de falha
  */
-function chamarOpenRouter(string $mensagem): ?string
+function chamarOpenRouter(string $mensagem, array $historico = []): ?string
 {
     $apiKey = Config::OPENROUTER_API_KEY;
 
     if (empty($apiKey) || $apiKey === 'sk-or-v1-SUA_CHAVE_AQUI') {
-        return null; // chave nao configurada
-    }
-
-    $payload = json_encode([
-        'model'      => Config::OPENROUTER_MODEL,
-        'max_tokens' => Config::CHATBOT_MAX_TOKENS,
-        'messages'   => [
-            [
-                'role'    => 'system',
-                'content' => Config::CHATBOT_SYSTEM_PROMPT,
-            ],
-            [
-                'role'    => 'user',
-                'content' => $mensagem,
-            ],
-        ],
-    ]);
-
-    $ch = curl_init(Config::OPENROUTER_API_URL);
-    curl_setopt_array($ch, [
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_POST           => true,
-        CURLOPT_POSTFIELDS     => $payload,
-        CURLOPT_TIMEOUT        => 15,
-        CURLOPT_HTTPHEADER     => [
-            'Content-Type: application/json',
-            'Authorization: Bearer ' . $apiKey,
-            'HTTP-Referer: http://localhost',
-            'X-Title: Rei da Esfirra Bot',
-        ],
-    ]);
-
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error    = curl_error($ch);
-    curl_close($ch);
-
-    if ($error || $httpCode !== 200) {
-        error_log("[ChatBot-IA] cURL error: {$error} | HTTP {$httpCode}");
         return null;
     }
 
-    $data = json_decode($response, true);
-    return $data['choices'][0]['message']['content'] ?? null;
+    $systemPrompt = 'Você é o assistente virtual do Rei da Esfirra. '
+        . 'Seja simpático, prestativo e use emojis. '
+        . 'Nosso cardápio tem esfirras Tradicionais a partir de R$ 6,50 '
+        . '(Carne, Frango, Queijo, Calabresa), Especiais a partir de R$ 8,50 '
+        . 'e Premium como Camarão por R$ 12,00. '
+        . 'Nunca invente produtos que não estão no cardápio e seja conciso nas respostas.';
+
+    $messages = [
+        [
+            'role'    => 'system',
+            'content' => $systemPrompt,
+        ],
+    ];
+
+    foreach ($historico as $item) {
+        $sender = $item['sender'] ?? 'bot';
+        $content = trim((string) ($item['message'] ?? ''));
+
+        if ($content === '') {
+            continue;
+        }
+
+        $messages[] = [
+            'role'    => $sender === 'user' ? 'user' : 'assistant',
+            'content' => $content,
+        ];
+    }
+
+    $messages[] = [
+        'role'    => 'user',
+        'content' => $mensagem,
+    ];
+
+    try {
+        $client = new \GuzzleHttp\Client([
+            'timeout' => 15,
+        ]);
+
+        $response = $client->post(Config::OPENROUTER_API_URL, [
+            'headers' => [
+                'Authorization' => 'Bearer ' . $apiKey,
+                'Content-Type'  => 'application/json',
+                'HTTP-Referer'  => 'http://localhost',
+                'X-Title'       => 'Rei da Esfirra Bot',
+            ],
+            'json' => [
+                'model'      => Config::OPENROUTER_MODEL,
+                'max_tokens' => Config::CHATBOT_MAX_TOKENS,
+                'messages'   => $messages,
+            ],
+        ]);
+
+        $data = json_decode(
+            $response->getBody()->getContents(),
+            true
+        );
+
+        return $data['choices'][0]['message']['content'] ?? null;
+
+    } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+        error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
+        return null;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -201,37 +223,37 @@ function chamarOpenRouter(string $mensagem): ?string
  * @param  string $mensagem
  * @return string|null
  */
-function chamarOpenRouterGuzzle(string $mensagem): ?string
+function chamarOpenRouterGuzzle(string $mensagem, array $historico = []): ?string
 {
-    // Descomente as linhas abaixo apos instalar o Guzzle:
-    //
-    // $client = new \GuzzleHttp\Client(['timeout' => 15]);
-    //
-    // try {
-    //     $response = $client->post(Config::OPENROUTER_API_URL, [
-    //         'headers' => [
-    //             'Authorization' => 'Bearer ' . Config::OPENROUTER_API_KEY,
-    //             'Content-Type'  => 'application/json',
-    //             'HTTP-Referer'  => 'http://localhost',
-    //             'X-Title'       => 'Rei da Esfirra Bot',
-    //         ],
-    //         'json' => [
-    //             'model'      => Config::OPENROUTER_MODEL,
-    //             'max_tokens' => Config::CHATBOT_MAX_TOKENS,
-    //             'messages'   => [
-    //                 ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
-    //                 ['role' => 'user',   'content' => $mensagem],
-    //             ],
-    //         ],
-    //     ]);
-    //
-    //     $data = json_decode($response->getBody()->getContents(), true);
-    //     return $data['choices'][0]['message']['content'] ?? null;
-    //
-    // } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-    //     error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
-    //     return null;
-    // }
+    
+     $client = new \GuzzleHttp\Client(['timeout' => 15]);
+    
+     try {
+         $response = $client->post(Config::OPENROUTER_API_URL, [
+             'headers' => [
+                 'Authorization' => 'Bearer ' . Config::OPENROUTER_API_KEY,
+                 'Content-Type'  => 'application/json',
+                 'HTTP-Referer'  => 'http://localhost',
+                 'X-Title'       => 'Rei da Esfirra Bot',
+             ],
+             'json' => [
+                 'model'      => Config::OPENROUTER_MODEL,
+                 'max_tokens' => Config::CHATBOT_MAX_TOKENS,
+                 'messages'   => [
+                     ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
+                     ['role' => 'user',   'content' => $mensagem],
+                 ],
+             ],
+         ]);
+    
+         $data = json_decode($response->getBody()->getContents(), true);
+         return $data['choices'][0]['message']['content'] ?? null;
+    
+     } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+         error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
+         return null;
+     }
 
-    return null; // remova esta linha ao descomentar o bloco acima
+return null;
+
 }

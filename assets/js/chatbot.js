@@ -12,26 +12,32 @@
  */
 
 const Reibot = (() => {
-  // ── Configuracao ─────────────────────────────────────────
   const ENDPOINT = "backend/chatbot_response.php";
-  const sessaoId = "sess_" + Math.random().toString(36).slice(2, 10);
+  const STORAGE_KEY = "reibot_sessao_id";
 
-  // Variacao de saudacao para dar personalidade
+  /**
+   * Persistência de sessão:
+   * mantém o mesmo ID após F5 durante a aba aberta.
+   * Troque sessionStorage por localStorage se quiser manter entre abas/sessões.
+   */
+  let sessaoId = sessionStorage.getItem(STORAGE_KEY);
+
+  if (!sessaoId) {
+    sessaoId = "sess_" + crypto.randomUUID().replace(/-/g, "").slice(0, 16);
+    sessionStorage.setItem(STORAGE_KEY, sessaoId);
+  }
+
   const SAUDACOES = [
-    "Boa escolha! Ja te ajudo. ",
+    "Boa escolha! Já te ajudo. ",
     "Perfeito! ",
-    "Ola! ",
+    "Olá! ",
     "Com prazer! ",
   ];
 
   let chatAberto = false;
 
-  // ── Init ──────────────────────────────────────────────────
   function init() {
-    document
-      .getElementById("chatbotToggle")
-      ?.addEventListener("click", _toggle);
-
+    document.getElementById("chatbotToggle")?.addEventListener("click", _toggle);
     document.getElementById("chatSend")?.addEventListener("click", _enviar);
 
     document.getElementById("chatInput")?.addEventListener("keydown", (e) => {
@@ -42,49 +48,38 @@ const Reibot = (() => {
     });
   }
 
-  // ── Toggle janela ─────────────────────────────────────────
   function _toggle() {
     chatAberto = !chatAberto;
 
-    document
-      .getElementById("chatbotWindow")
-      ?.classList.toggle("open", chatAberto);
+    document.getElementById("chatbotWindow")?.classList.toggle("open", chatAberto);
 
-    // Alterna icones
     const iconOpen = document.getElementById("chatIconOpen");
     const iconClose = document.getElementById("chatIconClose");
+
     if (iconOpen) iconOpen.style.display = chatAberto ? "none" : "inline";
     if (iconClose) iconClose.style.display = chatAberto ? "inline" : "none";
 
-    // Mensagem de boas-vindas na primeira abertura
     const msgs = document.getElementById("chatMessages");
+
     if (chatAberto && msgs && msgs.children.length === 0) {
-      setTimeout(
-        () =>
-          _renderBotMsg({
-            tipo: "bot",
-            texto: "Ola! Bem-vindo ao *Rei da Esfirra*! Como posso te ajudar?",
-            botoes: [
-              "Cardapio",
-              "Horarios",
-              "Localizacao",
-              "Preco",
-              "Delivery",
-            ],
-          }),
-        350,
-      );
+      setTimeout(() => {
+        _renderBotMsg({
+          tipo: "bot",
+          texto: "Olá! Bem-vindo ao *Rey da Esfirra*! Como posso te ajudar? 👑",
+          botoes: ["Cardápio", "Horários", "Localização", "Preço", "Delivery"],
+        });
+      }, 350);
     }
   }
 
-  // ── Enviar mensagem ───────────────────────────────────────
   async function _enviar() {
     const input = document.getElementById("chatInput");
     const texto = input?.value.trim();
+
     if (!texto) return;
+
     input.value = "";
 
-    // Renderiza mensagem do usuario
     _renderUserMsg(texto);
     _mostrarTyping();
 
@@ -97,8 +92,6 @@ const Reibot = (() => {
 
       const data = await res.json();
 
-      // Delay simulado para parecer mais humano
-      const delay = 500 + Math.random() * 600;
       setTimeout(() => {
         _removerTyping();
 
@@ -110,58 +103,60 @@ const Reibot = (() => {
           return;
         }
 
-        // Adiciona variacao de saudacao (20% das vezes, apenas em respostas longas)
-        if (
-          data.tipo === "bot" &&
-          data.texto.length > 40 &&
-          Math.random() < 0.2
-        ) {
+        if (data.tipo === "bot" && data.texto?.length > 40 && Math.random() < 0.2) {
           const saud = SAUDACOES[Math.floor(Math.random() * SAUDACOES.length)];
           data.texto = saud + data.texto;
         }
 
         _renderBotMsg(data);
-      }, delay);
-    } catch {
+      }, 500 + Math.random() * 600);
+    } catch (error) {
+      console.error("[Reibot]", error);
+
       setTimeout(() => {
         _removerTyping();
         _renderBotMsg({
           tipo: "bot",
-          texto: "Problema de conexao. Verifique se o servidor esta rodando.",
+          texto: "Problema de conexão. Verifique se o servidor está rodando.",
         });
       }, 600);
     }
   }
 
-  // Clique nos botoes de acao rapida
   window.chatClicar = function (texto) {
     const input = document.getElementById("chatInput");
     if (input) input.value = texto;
     _enviar();
   };
 
-  // ── Renderizacao ──────────────────────────────────────────
-
-  /** Renderiza mensagem do usuario */
   function _renderUserMsg(texto) {
     const el = document.createElement("div");
     el.className = "msg user";
+
+    // textContent impede execução de HTML vindo do usuário.
     el.textContent = texto;
+
     _append(el);
   }
 
-  /** Renderiza resposta do bot/IA */
   function _renderBotMsg(data) {
-    // Indica visualmente se e resposta de IA
     const isAi = data.tipo === "ai";
 
     const el = document.createElement("div");
     el.className = "msg bot";
-    if (isAi) el.style.borderLeft = "3px solid var(--secondary, #E67E22)";
+
+    if (isAi) {
+      el.style.borderLeft = "3px solid var(--secondary, #E67E22)";
+    }
+
+    /**
+     * Ainda usamos innerHTML porque queremos permitir markdown mínimo,
+     * mas o conteúdo é escapado antes em _mdLite().
+     */
     el.innerHTML = _mdLite(data.texto || "");
+
     _append(el);
 
-    // Renderiza botoes de acao rapida
     if (Array.isArray(data.botoes) && data.botoes.length) {
       const wrap = document.createElement("div");
       wrap.className = "msg-botoes";
@@ -177,7 +172,6 @@ const Reibot = (() => {
       _append(wrap);
     }
 
-    // Badge "IA" se resposta vier da inteligencia artificial
     if (isAi) {
       const badge = document.createElement("span");
       badge.style.cssText =
@@ -187,16 +181,17 @@ const Reibot = (() => {
     }
   }
 
-  /** Indicador de "digitando..." */
   function _mostrarTyping() {
     const el = document.createElement("div");
     el.className = "typing-indicator";
     el.id = "chatTyping";
+
     for (let i = 0; i < 3; i++) {
       const d = document.createElement("div");
       d.className = "typing-dot";
       el.appendChild(d);
     }
+
     _append(el);
   }
 
@@ -204,27 +199,30 @@ const Reibot = (() => {
     document.getElementById("chatTyping")?.remove();
   }
 
-  /** Adiciona elemento na lista de mensagens e faz scroll */
   function _append(el) {
     const container = document.getElementById("chatMessages");
     if (!container) return;
+
     container.appendChild(el);
     container.scrollTop = container.scrollHeight;
   }
 
   /**
-   * Markdown minimo: *negrito* e quebras de linha.
-   * Escapa HTML antes para evitar XSS.
+   * Sanitização leve contra XSS:
+   * 1. Escapa HTML inteiro.
+   * 2. Só depois aplica markdown controlado.
+   * 3. Não permite tags HTML reais vindas da IA/usuário.
    */
   function _mdLite(s) {
     return String(s)
       .replace(/&/g, "&amp;")
       .replace(/</g, "&lt;")
       .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
       .replace(/\*(.*?)\*/g, "<strong>$1</strong>")
       .replace(/\n/g, "<br>");
   }
 
-  // Expoe apenas o necessario
   return { init };
 })();

@@ -14,108 +14,124 @@
  *  6. Retorna JSON ao frontend
  */
 
-
 declare(strict_types=1);
 
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *'); // Permite que o JS fale com o PHP
+header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-
-// 1. INCLUA O HELPERS PRIMEIRO (Para o PHP conhecer a função formatarErro)
-// 1. OBRIGATÓRIO: Carregar as funções de erro primeiro
 require_once __DIR__ . '/chat_helpers.php';
 
-// 2. O AUTOLOAD (O "motor" que acha as pastas Core e Models sozinho)
-spl_autoload_register(function (string $class) {
+spl_autoload_register(function (string $class): void {
     $classPath = str_replace('\\', '/', $class);
-    // Usamos o caminho real do Windows para não ter erro de localização
     $file = $_SERVER['DOCUMENT_ROOT'] . '/chatbot/' . $classPath . '.php';
+
     if (file_exists($file)) {
         require_once $file;
     }
 });
 
-
-// 3. AGORA você pode usar as classes sem precisar de require individual
 use Core\Config;
-use Core\Connect;
 use Models\ChatMessage;
 use Models\ChatbotOption;
 
-// ── Valida metodo ─────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(formatarErro('Metodo nao permitido.'));
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit;
 }
 
-// ── Le e valida payload JSON ──────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(formatarErro('Metodo nao permitido.'), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $raw  = file_get_contents('php://input');
 $body = json_decode($raw, true);
 
-$mensagem = trim($body['mensagem'] ?? '');
-$sessaoId = trim($body['sessao_id'] ?? 'anonimo');
-
-if ($mensagem === '') {
-    http_response_code(422);
-    echo json_encode(formatarErro('Mensagem vazia.'));
+if (!is_array($body)) {
+    http_response_code(400);
+    echo json_encode(formatarErro('JSON invalido.'), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// ── Normaliza mensagem para comparacao ────────────────────────
+$mensagem = trim((string) ($body['mensagem'] ?? ''));
+$sessaoId = trim((string) ($body['sessao_id'] ?? 'anonimo'));
+
+if ($mensagem === '') {
+    http_response_code(422);
+    echo json_encode(formatarErro('Mensagem vazia.'), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $mensagemNorm = mb_strtolower($mensagem, 'UTF-8');
 
 try {
     $chatMessageModel   = new ChatMessage();
     $chatbotOptionModel = new ChatbotOption();
 
-    // 1. Salva mensagem do usuario no banco
+    /**
+     * Salva mensagem do usuário antes de buscar histórico,
+     * permitindo que a sessão fique completa no banco.
+     */
     $chatMessageModel->salvar($mensagem, 'user', $sessaoId);
 
-    // 2. Carrega todas as opcoes ativas para varredura
     $opcoes = $chatbotOptionModel->listarAtivas();
 
-    // 3. Detecta intencao (busca keyword na mensagem)
     $keyword = detectarIntencao($mensagemNorm, $opcoes);
 
     $respostaTexto = null;
-    $tipo          = 'bot';
+    $tipo = 'bot';
 
     if ($keyword !== null) {
-        // 3a. Encontrou keyword — busca resposta manual no banco
         $respostaTexto = buscarRespostaManual($keyword);
     }
 
     if ($respostaTexto === null && Config::CHATBOT_USE_AI) {
-        // 4. Nenhuma resposta manual — tenta IA (OpenRouter)
-        $respostaTexto = chamarOpenRouter($mensagem);
+        /**
+         * Busca as últimas 6 mensagens da sessão.
+         * Esse histórico será enviado para a IA como contexto.
+         */
+        $historico = $chatMessageModel->historicoDaSessao($sessaoId, 6);
+
+        $respostaTexto = chamarOpenRouterGuzzle($mensagem, $historico);
+
         if ($respostaTexto !== null) {
             $tipo = 'ai';
         }
     }
 
     if ($respostaTexto === null) {
-        // 5. Fallback: resposta padrao com botoes de acao rapida
         $payload = respostaPadrao();
+
         $chatMessageModel->salvar($payload['texto'], 'bot', $sessaoId);
-        echo json_encode($payload);
+
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    // 6. Salva resposta no banco
     $chatMessageModel->salvar($respostaTexto, $tipo, $sessaoId);
 
-    // 7. Retorna JSON ao frontend
-    echo json_encode(formatarResposta($respostaTexto, $tipo));
-
+    echo json_encode(
+        formatarResposta($respostaTexto, $tipo),
+        JSON_UNESCAPED_UNICODE
+    );
 } catch (\RuntimeException $e) {
     http_response_code(500);
-    $msg = Config::APP_DEBUG ? $e->getMessage() : 'Erro interno. Tente novamente.';
-    echo json_encode(formatarErro($msg));
+
+    $msg = Config::APP_DEBUG
+        ? $e->getMessage()
+        : 'Erro interno. Tente novamente.';
+
+    echo json_encode(formatarErro($msg), JSON_UNESCAPED_UNICODE);
 } catch (\Throwable $e) {
     http_response_code(500);
+
     error_log('[chatbot_response] ' . $e->getMessage());
-    echo json_encode(formatarErro('Erro inesperado. Tente novamente.'));
+
+    echo json_encode(
+        formatarErro('Erro inesperado. Tente novamente.'),
+        JSON_UNESCAPED_UNICODE
+    );
 }
