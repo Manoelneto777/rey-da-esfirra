@@ -77,9 +77,19 @@ try {
      */
     $chatMessageModel->salvar($mensagem, 'user', $sessaoId);
 
-    $opcoes = $chatbotOptionModel->listarAtivas();
-
-    $keyword = detectarIntencao($mensagemNorm, $opcoes);
+    // 3. Detecta intencao ignorando o banco de dados temporariamente
+    $keyword = null;
+    if (str_contains($mensagemNorm, 'cardapio') || str_contains($mensagemNorm, 'cardápio')) {
+        $keyword = 'cardapio';
+    } elseif (str_contains($mensagemNorm, 'horario') || str_contains($mensagemNorm, 'horário')) {
+        $keyword = 'horarios';
+    } elseif (str_contains($mensagemNorm, 'local') || str_contains($mensagemNorm, 'endereço')) {
+        $keyword = 'localizacao';
+    } elseif (str_contains($mensagemNorm, 'preco') || str_contains($mensagemNorm, 'preço')) {
+        $keyword = 'precos';
+    } elseif (str_contains($mensagemNorm, 'delivery') || str_contains($mensagemNorm, 'entrega')) {
+        $keyword = 'delivery';
+    }
 
     $respostaTexto = null;
     $tipo = 'bot';
@@ -113,10 +123,14 @@ try {
 
     $chatMessageModel->salvar($respostaTexto, $tipo, $sessaoId);
 
-    echo json_encode(
-        formatarResposta($respostaTexto, $tipo),
-        JSON_UNESCAPED_UNICODE
-    );
+// 7. Retorna JSON ao frontend
+$resultadoFinal = formatarResposta($respostaTexto, $tipo);
+
+// Injeta os botões de ação rápida no final de TODAS as respostas
+$resultadoFinal['botoes'] = ['Cardápio', 'Horários', 'Localização', 'Preços', 'Delivery'];
+
+echo json_encode($resultadoFinal);
+
 } catch (\RuntimeException $e) {
     http_response_code(500);
 

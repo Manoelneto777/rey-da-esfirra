@@ -62,13 +62,21 @@ const Reibot = (() => {
     const msgs = document.getElementById("chatMessages");
 
     if (chatAberto && msgs && msgs.children.length === 0) {
-      setTimeout(() => {
-        _renderBotMsg({
-          tipo: "bot",
-          texto: "Olá! Bem-vindo ao *Rey da Esfirra*! Como posso te ajudar? 👑",
-          botoes: ["Cardápio", "Horários", "Localização", "Preço", "Delivery"],
-        });
-      }, 350);
+      setTimeout(
+        () =>
+          _renderBotMsg({
+            tipo: "bot",
+            texto: "Ola! Bem-vindo ao *Rei da Esfirra*! Como posso te ajudar?",
+            botoes: [
+              "Cardápio",
+              "Horários",
+              "Localização",
+              "Preços",
+              "Delivery",
+            ],
+          }),
+        350,
+      );
     }
   }
 

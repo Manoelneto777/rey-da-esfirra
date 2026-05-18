@@ -57,11 +57,58 @@ function detectarIntencao(string $mensagem, array $opcoes): ?string
  * @param  string $keyword
  * @return string|null  Resposta encontrada ou null
  */
-function buscarRespostaManual(string $keyword): ?string
-{
-    $model  = new ChatbotOption();
-    $opcao  = $model->buscarPorKeyword($keyword);
-    return $opcao ? $opcao['response'] : null;
+function buscarRespostaManual(string $keyword): ?string {
+    switch ($keyword) {
+        case 'cardapio':
+            return "👑 *Nosso Cardápio Atualizado*\n\n" .
+                   "🍕 *Tradicionais:* a partir de R$ 6,50\n" .
+                   "(Carne, Frango, Queijo, Calabresa)\n\n" .
+
+                   "✨ *Especiais:* a partir de R$ 8,50\n" .
+                   "(Palmito, Atum)\n\n" .
+
+                   "🍤 *Premium:* Valor de R$ 12,00\n" .
+                   "(Camarão)\n\n" .
+
+                   "🍫 *Doces:* a partir de R$ 7,50\n" .
+                   "(Chocolate, Queijo com Goiabada)\n\n" .
+
+                   "🍟 *Combos da Galera:*\n" .
+                   "10 un. por R$ 65,00\n" .
+                   "20 un. Mix por R$ 120,00\n\n" .
+                   
+                   "🛵 *Taxa de entrega:* R$ 5,00 (Grátis acima de R$ 60)\n\n" .
+                   "Qual sabor vai matar sua fome hoje?";
+        
+        case 'horarios':
+            return "⏰ *Nossos Horários de Funcionamento:*\n\n" .
+                   "Segunda a Quinta: 13h às 22:30h\n" .
+                   "Sexta e Sábado: 13h às 23h\n" .
+                   "Domingo: 13h às 22h\n\n" .
+                   "Fornos sempre quentes pra você!";
+        
+        case 'localizacao':
+            return "📍 *Onde Estamos:*\n\n" .
+                   "Avenida Principal, 580 — Centro\n" .
+                   "Capoeiruçu — Bahia\n\n" .
+                   "Venha nos fazer uma visita ou peça pelo Delivery!";
+                   
+        case 'precos':
+            return "💰 *Nossos Preços Base:*\n\n" .
+                   "Esfirras a partir de R$ 6,50.\n" .
+                   "Refrigerantes a partir de R$ 5,00.\n\n" .
+                   "Acesse a opção *Cardápio* para ver todos os detalhes!";
+                   
+        case 'delivery':
+            return "🛵 *Sobre o nosso Delivery:*\n\n" .
+                   "Entregamos em Capoeiruçu e região.\n" .
+                   "Tempo médio: 30 a 50 minutos.\n" .
+                   "Taxa: R$ 5,00 (Grátis para pedidos acima de R$ 60,00).\n" .
+                   "Pedido Mínimo: R$ 25,00.";
+
+        default:
+            return null;
+    }
 }
 
 // ─────────────────────────────────────────────────────────────

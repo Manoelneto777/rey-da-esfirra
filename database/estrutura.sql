@@ -3,10 +3,10 @@
 -- Execute no phpMyAdmin: Importar > selecionar este arquivo
 -- ═══════════════════════════════════════════════════════════
 
-CREATE DATABASE IF NOT EXISTS Reydaesfirra
+CREATE DATABASE IF NOT EXISTS Chatbot
   CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE Reydaesfirra;
+USE Chatbot;
 
 -- ─── produtos ───────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS produtos (
@@ -75,19 +75,19 @@ CREATE TABLE IF NOT EXISTS chatbot_options (
 
 -- ─── Produtos de exemplo ────────────────────────────────────
 INSERT INTO produtos (nome, descricao, preco, categoria, imagem) VALUES
-('Esfirra de Carne',       'Carne moida temperada com cebola, tomate e ervas finas',               7.50,  'Tradicionais', 'carne.webp'),
-('Esfirra de Frango',      'Frango desfiado com catupiry cremoso e ervas especiais',               7.50,  'Tradicionais', 'frango.webp'),
-('Esfirra de Queijo',      'Mussarela derretida com oregano classica e irresistivel',              6.50,  'Tradicionais', 'queijo.webp'),
-('Esfirra de Calabresa',   'Calabresa artesanal com cebola caramelizada e pimentao',               8.00,  'Tradicionais', 'calabresa.webp'),
-('Esfirra de Palmito',     'Palmito pupunha cremoso com temperos especiais da casa',               8.50,  'Especiais',    'palmito.webp'),
-('Esfirra de Atum',        'Atum especial com azeitona preta e cebola roxa',                       9.00,  'Especiais',    'atum.webp'),
-('Esfirra de Camarao',     'Camarao refogado no alho e azeite com pimentao vermelho',              12.00, 'Premium',      'camarao.webp'),
-('Esfirra Doce de Banana', 'Banana caramelizada com canela e leite condensado',                    7.00,  'Doces',        'banana.webp'),
-('Esfirra de Chocolate',   'Chocolate meio amargo cremoso com granulado especial',                 7.50,  'Doces',        'chocolate.webp'),
-('Combo 10 un. Carne',     'Dez esfirras de carne com desconto especial da casa',                  65.00, 'Combos',       'combo.webp'),
-('Combo 20 Mix',           'Vinte esfirras mistas a sua escolha melhor custo-beneficio',           120.00,'Combos',       'combo-mix.webp'),
-('Refrigerante Lata',      'Coca-Cola Guarana ou Sprite bem gelados 350ml',                        5.00,  'Bebidas',      'refri.webp'),
-('Suco Natural 300ml',     'Laranja Limao ou Maracuja feito na hora',                              8.00,  'Bebidas',      'suco.webp');
+('Esfirra de Carne',       'Carne moida temperada com cebola, tomate e ervas finas',               7.50,  'Tradicionais', 'carne.svg'),
+('Esfirra de Frango',      'Frango desfiado com catupiry cremoso e ervas especiais',               7.50,  'Tradicionais', 'frango.svg'),
+('Esfirra de Queijo',      'Mussarela derretida com oregano classica e irresistivel',              6.50,  'Tradicionais', 'queijo.svg'),
+('Esfirra de Calabresa',   'Calabresa artesanal com cebola caramelizada e pimentao',               8.00,  'Tradicionais', 'calabresa.svg'),
+('Esfirra de Palmito',     'Palmito pupunha cremoso com temperos especiais da casa',               8.50,  'Especiais',    'palmito.svg'),
+('Esfirra de Atum',        'Atum especial com azeitona preta e cebola roxa',                       9.00,  'Especiais',    'atum.svg'),
+('Esfirra de Camarao',     'Camarao refogado no alho e azeite com pimentao vermelho',              12.00, 'Premium',      'camarao.svg'),
+('Esfirra Doce de Banana', 'Banana caramelizada com canela e leite condensado',                    7.00,  'Doces',        'banana.svg'),
+('Esfirra de Chocolate',   'Chocolate meio amargo cremoso com granulado especial',                 7.50,  'Doces',        'chocolate.svg'),
+('Combo 10 un. Carne',     'Dez esfirras de carne com desconto especial da casa',                  65.00, 'Combos',       'combo.svg'),
+('Combo 20 Mix',           'Vinte esfirras mistas a sua escolha melhor custo-beneficio',           120.00,'Combos',       'combo-mix.svg'),
+('Refrigerante Lata',      'Coca-Cola Guarana ou Sprite bem gelados 350ml',                        5.00,  'Bebidas',      'refri.svg'),
+('Suco Natural 300ml',     'Laranja Limao ou Maracuja feito na hora',                              8.00,  'Bebidas',      'suco.svg');
 
 -- ─── Palavras-chave do chatbot ──────────────────────────────
 INSERT INTO chatbot_options (keyword, response) VALUES
