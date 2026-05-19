@@ -7,7 +7,7 @@
 
 const Api = (() => {
   /** Prefixo do backend — ajuste se mudar o host */
-const BASE = "http://localhost:8080/chatbot/backend/";
+const BASE = "http://localhost/reydaesfirra/backend";
 
   /**
    * Busca produtos, com filtro opcional de categoria.
@@ -64,7 +64,7 @@ const BASE = "http://localhost:8080/chatbot/backend/";
    * @returns {Promise<{ tipo, texto, botoes? }>}
    */
   async function postChatbot(mensagem, sessaoId) {
-    const res = await fetch(`${BASE}/chatbot.php`, {
+    const res = await fetch(`${BASE}/chatbot_response.php`, {
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ mensagem, sessao_id: sessaoId }),

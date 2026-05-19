@@ -40,10 +40,17 @@ const Pedido = (() => {
   // ── Modal ───────────────────────────────────────
   function _abrirModal() {
     const itens = Cart.getItens();
+
     if (itens.length === 0) {
       UI.toast('⚠️', 'Adicione itens ao carrinho primeiro.', 'error');
       return;
     }
+
+    // Fecha o carrinho antes de abrir o modal
+    document.getElementById('cartSidebar')?.classList.remove('open');
+    document.getElementById('cartOverlay')?.classList.remove('open');
+
+    // Renderiza o resumo e abre o modal
     _renderizarResumo(itens);
     document.getElementById('modalOverlay')?.classList.add('open');
     document.getElementById('pedidoNome')?.focus();
