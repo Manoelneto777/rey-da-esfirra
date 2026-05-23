@@ -63,8 +63,11 @@ const BASE = "http://localhost:8080/chatbot/backend/";
    * @param {string} sessaoId
    * @returns {Promise<{ tipo, texto, botoes? }>}
    */
-  async function postChatbot(mensagem, sessaoId) {
-    const res = await fetch(`${BASE}/chatbot.php`, {
+
+
+ /**async function postChatbot(mensagem, sessaoId) {
+    // 👇 O AJUSTE FOI FEITO NA LINHA ABAIXO 👇
+    const res = await fetch(`${BASE}chatbot_response.php`, { 
       method:  'POST',
       headers: { 'Content-Type': 'application/json' },
       body:    JSON.stringify({ mensagem, sessao_id: sessaoId }),
@@ -72,8 +75,11 @@ const BASE = "http://localhost:8080/chatbot/backend/";
 
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     return res.json();
-  }
+  } */
+  
+//comentada por enquanto para testes sem backend, retornando resposta fixa
+
 
   // Expõe apenas o necessário
-  return { getProdutos, postPedido, postChatbot };
+  return { getProdutos, postPedido };
 })();

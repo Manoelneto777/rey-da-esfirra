@@ -4,43 +4,34 @@
  *
  * Endpoint principal do chatbot.
  * Recebe POST JSON do frontend (chatbot.js) e retorna JSON.
- *
- * Fluxo:
- *  1. Valida a requisicao
- *  2. Salva mensagem do usuario no banco
- *  3. Tenta resposta manual (banco de palavras-chave)
- *  4. Se nao encontrar e IA estiver ativa, chama OpenRouter
- *  5. Salva resposta no banco
- *  6. Retorna JSON ao frontend
  */
-
 
 declare(strict_types=1);
 
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 header('Content-Type: application/json; charset=utf-8');
-header('Access-Control-Allow-Origin: *'); // Permite que o JS fale com o PHP
+header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type');
 
-
-// 1. INCLUA O HELPERS PRIMEIRO (Para o PHP conhecer a função formatarErro)
-// 1. OBRIGATÓRIO: Carregar as funções de erro primeiro
+// 1. OBRIGATÓRIO: Carregar as funções auxiliares primeiro
 require_once __DIR__ . '/chat_helpers.php';
 
-// 2. O AUTOLOAD (O "motor" que acha as pastas Core e Models sozinho)
+// 2. AUTOLOAD À PROVA DE FALHAS (Garante a importação do banco de dados)
 spl_autoload_register(function (string $class) {
     $classPath = str_replace('\\', '/', $class);
-    // Usamos o caminho real do Windows para não ter erro de localização
-    $file = $_SERVER['DOCUMENT_ROOT'] . '/chatbot/' . $classPath . '.php';
+    // Usa __DIR__ para partir da pasta backend/ exata onde estamos
+    $file = __DIR__ . '/' . $classPath . '.php';
     if (file_exists($file)) {
         require_once $file;
     }
 });
 
-
-// 3. AGORA você pode usar as classes sem precisar de require individual
+// 3. Importação das classes
 use Core\Config;
-use Core\Connect;
 use Models\ChatMessage;
 use Models\ChatbotOption;
 
@@ -68,13 +59,14 @@ if ($mensagem === '') {
 $mensagemNorm = mb_strtolower($mensagem, 'UTF-8');
 
 try {
+    // Instancia os modelos de banco de dados
     $chatMessageModel   = new ChatMessage();
     $chatbotOptionModel = new ChatbotOption();
 
     // 1. Salva mensagem do usuario no banco
     $chatMessageModel->salvar($mensagem, 'user', $sessaoId);
 
-    // 3. Detecta intencao ignorando o banco de dados temporariamente
+    // 2. Detecta intencao manual
     $keyword = null;
     if (str_contains($mensagemNorm, 'cardapio') || str_contains($mensagemNorm, 'cardápio')) {
         $keyword = 'cardapio';
@@ -92,14 +84,20 @@ try {
     $tipo          = 'bot';
 
     if ($keyword !== null) {
-        // 3a. Encontrou keyword — busca resposta manual no banco
+        // 3a. Encontrou keyword — busca resposta manual 
         $respostaTexto = buscarRespostaManual($keyword);
     }
 
     if ($respostaTexto === null && Config::CHATBOT_USE_AI) {
         // 4. Nenhuma resposta manual — tenta IA (OpenRouter)
-        $respostaTexto = chamarOpenRouter($mensagem);
-        if ($respostaTexto !== null) {
+        $respostaTextoIA = chamarOpenRouter($mensagem);
+        
+        // Se a API retornar o alerta de debug, registramos o erro no log e anulamos a resposta
+        if ($respostaTextoIA !== null && str_contains($respostaTextoIA, '🚨')) {
+            error_log("Falha na API da OpenRouter: " . $respostaTextoIA);
+            $respostaTexto = null; 
+        } else {
+            $respostaTexto = $respostaTextoIA;
             $tipo = 'ai';
         }
     }
@@ -115,20 +113,17 @@ try {
     // 6. Salva resposta no banco
     $chatMessageModel->salvar($respostaTexto, $tipo, $sessaoId);
 
-// 7. Retorna JSON ao frontend
-$resultadoFinal = formatarResposta($respostaTexto, $tipo);
+    // 7. Retorna JSON ao frontend
+    $resultadoFinal = formatarResposta($respostaTexto, $tipo);
 
-// Injeta os botões de ação rápida no final de TODAS as respostas
-$resultadoFinal['botoes'] = ['Cardápio', 'Horários', 'Localização', 'Preços', 'Delivery'];
+    // Injeta os botões de ação rápida
+    $resultadoFinal['botoes'] = ['Cardápio', 'Horários', 'Localização', 'Preços', 'Delivery'];
 
-echo json_encode($resultadoFinal);
+    echo json_encode($resultadoFinal);
 
-} catch (\RuntimeException $e) {
-    http_response_code(500);
-    $msg = Config::APP_DEBUG ? $e->getMessage() : 'Erro interno. Tente novamente.';
-    echo json_encode(formatarErro($msg));
 } catch (\Throwable $e) {
+    // Em produção, gravamos o erro no log do servidor, mas não na tela do cliente
     http_response_code(500);
-    error_log('[chatbot_response] ' . $e->getMessage());
-    echo json_encode(formatarErro('Erro inesperado. Tente novamente.'));
+    error_log('[chatbot_response] ERRO FATAL: ' . $e->getMessage() . ' no arquivo ' . basename($e->getFile()) . ' linha ' . $e->getLine());
+    echo json_encode(formatarErro('Erro interno no servidor. Tente novamente mais tarde.'));
 }

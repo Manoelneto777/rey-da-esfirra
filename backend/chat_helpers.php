@@ -140,12 +140,13 @@ function formatarResposta(string $texto, string $tipo = 'bot', array $botoes = [
  * @param  string $mensagem
  * @return array
  */
+
 function formatarErro(string $mensagem): array
 {
     return [
         'sucesso' => false,
-        'erro'    => $mensagem,
-        'texto'   => 'Desculpe, ocorreu um erro. Tente novamente.',
+        'erro'    => $mensagem, // O erro real fica oculto aqui para o dev ler no F12
+        'texto'   => 'Desculpe, ocorreu um erro de conexão. Tente novamente.', // O cliente só vê isso
         'tipo'    => 'bot',
     ];
 }
@@ -189,22 +190,16 @@ function chamarOpenRouter(string $mensagem): ?string
 {
     $apiKey = Config::OPENROUTER_API_KEY;
 
-    if (empty($apiKey) || $apiKey === 'sk-or-v1-SUA_CHAVE_AQUI') {
-        return null; // chave nao configurada
+    if (empty($apiKey) || str_contains($apiKey, 'COLE_SUA_CHAVE_AQUI')) {
+        return "⚠️ Chave da API não configurada.";
     }
 
     $payload = json_encode([
         'model'      => Config::OPENROUTER_MODEL,
         'max_tokens' => Config::CHATBOT_MAX_TOKENS,
         'messages'   => [
-            [
-                'role'    => 'system',
-                'content' => Config::CHATBOT_SYSTEM_PROMPT,
-            ],
-            [
-                'role'    => 'user',
-                'content' => $mensagem,
-            ],
+            ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
+            ['role' => 'user',   'content' => $mensagem],
         ],
     ]);
 
@@ -213,7 +208,11 @@ function chamarOpenRouter(string $mensagem): ?string
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => $payload,
-        CURLOPT_TIMEOUT        => 15,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
+        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
         CURLOPT_HTTPHEADER     => [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $apiKey,
@@ -228,13 +227,13 @@ function chamarOpenRouter(string $mensagem): ?string
     curl_close($ch);
 
     if ($error || $httpCode !== 200) {
-        error_log("[ChatBot-IA] cURL error: {$error} | HTTP {$httpCode}");
-        return null;
+        return "🚨 *DEBUG API* 🚨\nErro: $error\nCódigo HTTP: $httpCode\nResposta: $response";
     }
 
     $data = json_decode($response, true);
-    return $data['choices'][0]['message']['content'] ?? null;
+    return $data['choices'][0]['message']['content'] ?? "A IA processou, mas não retornou texto.";
 }
+
 
 // ─────────────────────────────────────────────────────────────
 // 5b. CHAMAR OPENROUTER COM GUZZLE (opcional / com Composer)

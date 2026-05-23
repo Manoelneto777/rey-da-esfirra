@@ -270,10 +270,9 @@
   Finalizar Pedido →
 </button>
 
-<a href="index.html" class="btn-voltar-compras" id="btnVoltarCompras" type="submit">
-      ← Continuar Comprando
-      
-    </a>
+<a class="btn btn-voltar-compras" id="btnVoltarCompras" style="cursor: pointer;">
+    &larr; Continuar Comprando
+    </a>  
     </a>
     </a>
   </div>
@@ -352,16 +351,17 @@
 <script src="assets/js/api.js"></script>
 <script src="assets/js/cart.js"></script>
 <script src="assets/js/pedido.js"></script>
-<script src="assets/js/app.js?v=2"></script>
+<script src="assets/js/app.js"></script>
 <script src="assets/js/chatbot.js"></script>
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-      if (typeof ReiBot !== 'undefined') {
-          ReiBot.init();
+      if (typeof Reibot !== 'undefined') {
+          Reibot.init();
       }
   });
 </script>
 
 </body>
 </html>
+
