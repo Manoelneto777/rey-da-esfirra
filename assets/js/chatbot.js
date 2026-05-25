@@ -1,31 +1,31 @@
 /**
  * assets/js/chatbot.js
  *
- * Modulo do chatbot integrado com backend/chatbot_response.php
- * Faz parte da arquitetura MVC simplificada do projeto.
+ * Módulo do chatbot integrado ao backend/chatbot_response.php.
  *
- * Fluxo:
- *  1. Usuario digita mensagem
- *  2. JS envia via fetch POST para backend/chatbot_response.php
- *  3. PHP processa (manual ou IA) e retorna JSON
- *  4. JS renderiza a resposta na janela do chat
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │ O QUE MUDOU                                                  │
+ * │ Antes o front mandava apenas `sessao_id`, que o banco nem    │
+ * │ tinha coluna para receber. Agora ele trabalha com            │
+ * │ `conversation_id`: na 1ª mensagem manda null, o backend cria │
+ * │ a conversa e devolve o id, e o front passa a reenviar esse   │
+ * │ id nas próximas mensagens. É isso que fecha o fluxo          │
+ * │ chat_conversations → chat_messages exigido no projeto.       │
+ * └─────────────────────────────────────────────────────────────┘
  */
 
 const Reibot = (() => {
   const ENDPOINT = "backend/chatbot_response.php";
-  const STORAGE_KEY = "reibot_sessao_id";
+  const STORAGE_KEY = "reibot_conversation_id"; // antes guardava a sessão
 
   /**
-   * Persistência de sessão:
-   * mantém o mesmo ID após F5 durante a aba aberta.
-   * Troque sessionStorage por localStorage se quiser manter entre abas/sessões.
+   * Recupera o conversation_id salvo nesta aba (se já houve conversa).
+   * Pode ser null/NaN na primeira vez — tudo bem, o backend cria.
    */
-  let sessaoId = sessionStorage.getItem(STORAGE_KEY);
-
-  if (!sessaoId) {
-    sessaoId = "sess_" + crypto.randomUUID().replace(/-/g, "").slice(0, 16);
-    sessionStorage.setItem(STORAGE_KEY, sessaoId);
-  }
+  let conversationId = (() => {
+    const salvo = sessionStorage.getItem(STORAGE_KEY);
+    return salvo ? parseInt(salvo, 10) : null;
+  })();
 
   const SAUDACOES = [
     "Boa escolha! Já te ajudo. ",
@@ -61,19 +61,14 @@ const Reibot = (() => {
 
     const msgs = document.getElementById("chatMessages");
 
+    // Mensagem de boas-vindas só na primeira abertura.
     if (chatAberto && msgs && msgs.children.length === 0) {
       setTimeout(
         () =>
           _renderBotMsg({
             tipo: "bot",
-            texto: "Ola! Bem-vindo ao *Rei da Esfirra*! Como posso te ajudar?",
-            botoes: [
-              "Cardápio",
-              "Horários",
-              "Localização",
-              "Preços",
-              "Delivery",
-            ],
+            texto: "Olá! Bem-vindo ao *Rei da Esfirra*! Como posso te ajudar?",
+            botoes: ["Cardápio", "Horários", "Localização", "Preços", "Delivery"],
           }),
         350,
       );
@@ -95,11 +90,22 @@ const Reibot = (() => {
       const res = await fetch(ENDPOINT, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ mensagem: texto, sessao_id: sessaoId }),
+        // 👇 enviamos o conversation_id atual (null na 1ª vez)
+        body: JSON.stringify({
+          mensagem: texto,
+          conversation_id: conversationId,
+        }),
       });
 
       const data = await res.json();
 
+      // 👇 guardamos o id que o backend criou/confirmou, para reenviar depois
+      if (data.conversation_id) {
+        conversationId = data.conversation_id;
+        sessionStorage.setItem(STORAGE_KEY, String(conversationId));
+      }
+
+      // Pequeno atraso para parecer "digitação" humana.
       setTimeout(() => {
         _removerTyping();
 
@@ -111,6 +117,7 @@ const Reibot = (() => {
           return;
         }
 
+        // De vez em quando, prefixa uma saudação em respostas longas.
         if (data.tipo === "bot" && data.texto?.length > 40 && Math.random() < 0.2) {
           const saud = SAUDACOES[Math.floor(Math.random() * SAUDACOES.length)];
           data.texto = saud + data.texto;
@@ -131,6 +138,7 @@ const Reibot = (() => {
     }
   }
 
+  // Permite que os botões de ação rápida "digitem" por você.
   window.chatClicar = function (texto) {
     const input = document.getElementById("chatInput");
     if (input) input.value = texto;
@@ -140,10 +148,8 @@ const Reibot = (() => {
   function _renderUserMsg(texto) {
     const el = document.createElement("div");
     el.className = "msg user";
-
-    // textContent impede execução de HTML vindo do usuário.
+    // textContent impede execução de HTML vindo do usuário (anti-XSS).
     el.textContent = texto;
-
     _append(el);
   }
 
@@ -157,10 +163,8 @@ const Reibot = (() => {
       el.style.borderLeft = "3px solid var(--secondary, #E67E22)";
     }
 
-    /**
-     * Ainda usamos innerHTML porque queremos permitir markdown mínimo,
-     * mas o conteúdo é escapado antes em _mdLite().
-     */
+    // innerHTML é usado porque queremos markdown mínimo, mas o conteúdo
+    // é escapado ANTES em _mdLite() — então não há injeção de HTML real.
     el.innerHTML = _mdLite(data.texto || "");
 
     _append(el);
@@ -217,9 +221,9 @@ const Reibot = (() => {
 
   /**
    * Sanitização leve contra XSS:
-   * 1. Escapa HTML inteiro.
-   * 2. Só depois aplica markdown controlado.
-   * 3. Não permite tags HTML reais vindas da IA/usuário.
+   * 1. Escapa todo o HTML.
+   * 2. Só depois aplica markdown controlado (*negrito* e quebras de linha).
+   * 3. Nunca permite tags HTML reais vindas da IA/usuário.
    */
   function _mdLite(s) {
     return String(s)
