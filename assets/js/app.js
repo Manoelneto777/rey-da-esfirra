@@ -303,145 +303,17 @@ const Navbar = (() => {
 })();
 
 // ── Chatbot ─────────────────────────────────────
-const Chatbot = (() => {
-  const sessaoId = "sess_" + Math.random().toString(36).slice(2, 10);
-  let aberto = false;
 
-  function init() {
-    document
-      .getElementById("chatbotToggle")
-      ?.addEventListener("click", _toggle);
-    document.getElementById("chatSend")?.addEventListener("click", _enviar);
-    document.getElementById("chatInput")?.addEventListener("keydown", (e) => {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        _enviar();
-      }
-    });
-  }
-  function _toggle() {
-    aberto = !aberto;
-    const win = document.getElementById("chatbotWindow");
-    const label = document.querySelector(".chat-label");
+//apagado para teste 
 
-    win?.classList.toggle("open", aberto);
-    if (label) {
-      label.style.display = aberto ? "none" : "block";
-    }
 
-    const iconOpen = document.getElementById("chatIconOpen");
-    const iconClose = document.getElementById("chatIconClose");
-    if (iconOpen) iconOpen.style.display = aberto ? "none" : "inline";
-    if (iconClose) iconClose.style.display = aberto ? "inline" : "none";
 
-    const msgs = document.getElementById("chatMessages");
-    if (aberto && msgs && msgs.children.length === 0) {
-      setTimeout(
-        () =>
-          _addBotMsg({
-            tipo: "botoes",
-            texto:
-              "👋 Olá! Bem-vindo ao *Rei da Esfirra*! 🥙\nComo posso te ajudar?",
-            botoes: [
-              "📋 Cardápio",
-              "⏰ Horários",
-              "📍 Localização",
-              "💰 Preços",
-              "🛵 Delivery",
-            ],
-          }),
-        350,
-      );
-    }
-  }
-  async function _enviar() {
-    const input = document.getElementById("chatInput");
-    const texto = input?.value.trim();
-    if (!texto) return;
-    input.value = "";
-    _addUserMsg(texto);
-    _addTyping();
-    try {
-      const resp = await Api.postChatbot(texto, sessaoId);
-      setTimeout(() => {
-        _removeTyping();
-        _addBotMsg(resp);
-      }, 600);
-    } catch {
-      setTimeout(() => {
-        _removeTyping();
-        _addBotMsg({ tipo: "texto", texto: "😔 Erro de conexão." });
-      }, 600);
-    }
-  }
-
-  window.chatClicar = (t) => {
-    const i = document.getElementById("chatInput");
-    if (i) i.value = t;
-    _enviar();
-  };
-  function _addUserMsg(t) {
-    const el = document.createElement("div");
-    el.className = "msg user";
-    el.textContent = t;
-    _append(el);
-  }
-  function _addBotMsg(d) {
-    const el = document.createElement("div");
-    el.className = "msg bot";
-    el.innerHTML = _mdLite(d.texto || "");
-    _append(el);
-    if (Array.isArray(d.botoes) && d.botoes.length) {
-      const w = document.createElement("div");
-      w.className = "msg-botoes";
-      d.botoes.forEach((b) => {
-        const btn = document.createElement("button");
-        btn.className = "msg-btn";
-        btn.textContent = b;
-        btn.addEventListener("click", () => window.chatClicar(b));
-        w.appendChild(btn);
-      });
-      _append(w);
-    }
-  }
-  function _addTyping() {
-    const el = document.createElement("div");
-    el.className = "typing-indicator";
-    el.id = "chatTyping";
-    for (let i = 0; i < 3; i++) {
-      const d = document.createElement("div");
-      d.className = "typing-dot";
-      el.appendChild(d);
-    }
-    _append(el);
-  }
-  function _removeTyping() {
-    document.getElementById("chatTyping")?.remove();
-  }
-  function _append(el) {
-    const c = document.getElementById("chatMessages");
-    if (c) {
-      c.appendChild(el);
-      c.scrollTop = c.scrollHeight;
-    }
-  }
-  function _mdLite(s) {
-    return s
-      .replace(/&/g, "&")
-      .replace(/</g, "<")
-      .replace(/>/g, ">")
-      .replace(/\*(.*?)\*/g, "<strong>$1</strong>")
-      .replace(/\n/g, "<br>");
-  }
-
-  return { init };
-})();
 
 // ── Bootstrap ────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   Navbar.init();
   CartUI.init();
-  Chatbot.init();
+
   Pedido.init();
   Cardapio.initFiltros();
   Cardapio.carregar();

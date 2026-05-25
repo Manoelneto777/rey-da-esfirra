@@ -10,8 +10,13 @@ namespace Core;
 use PDO;
 use PDOException;
 
+// Força a leitura das senhas antes de tentar conectar no banco
+require_once __DIR__ . '/Config.php';
+
 class Connect
 {
+    // ... o resto do seu código continua normal abaixo
+   
     /** @var PDO|null Instancia unica da conexao */
     private static ?PDO $instance = null;
 

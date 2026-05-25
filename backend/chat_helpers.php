@@ -140,12 +140,13 @@ function formatarResposta(string $texto, string $tipo = 'bot', array $botoes = [
  * @param  string $mensagem
  * @return array
  */
+
 function formatarErro(string $mensagem): array
 {
     return [
         'sucesso' => false,
-        'erro'    => $mensagem,
-        'texto'   => 'Desculpe, ocorreu um erro. Tente novamente.',
+        'erro'    => $mensagem, // O erro real fica oculto aqui para o dev ler no F12
+        'texto'   => 'Desculpe, ocorreu um erro de conexão. Tente novamente.', // O cliente só vê isso
         'tipo'    => 'bot',
     ];
 }
@@ -189,74 +190,50 @@ function chamarOpenRouter(string $mensagem, array $historico = []): ?string
 {
     $apiKey = Config::OPENROUTER_API_KEY;
 
-    if (empty($apiKey) || $apiKey === 'sk-or-v1-SUA_CHAVE_AQUI') {
-        return null;
+    if (empty($apiKey) || str_contains($apiKey, 'COLE_SUA_CHAVE_AQUI')) {
+        return "⚠️ Chave da API não configurada.";
     }
 
-    $systemPrompt = 'Você é o assistente virtual do Rei da Esfirra. '
-        . 'Seja simpático, prestativo e use emojis. '
-        . 'Nosso cardápio tem esfirras Tradicionais a partir de R$ 6,50 '
-        . '(Carne, Frango, Queijo, Calabresa), Especiais a partir de R$ 8,50 '
-        . 'e Premium como Camarão por R$ 12,00. '
-        . 'Nunca invente produtos que não estão no cardápio e seja conciso nas respostas.';
-
-    $messages = [
-        [
-            'role'    => 'system',
-            'content' => $systemPrompt,
+    $payload = json_encode([
+        'model'      => Config::OPENROUTER_MODEL,
+        'max_tokens' => Config::CHATBOT_MAX_TOKENS,
+        'messages'   => [
+            ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
+            ['role' => 'user',   'content' => $mensagem],
         ],
-    ];
+    ]);
 
-    foreach ($historico as $item) {
-        $sender = $item['sender'] ?? 'bot';
-        $content = trim((string) ($item['message'] ?? ''));
-
-        if ($content === '') {
-            continue;
-        }
-
-        $messages[] = [
-            'role'    => $sender === 'user' ? 'user' : 'assistant',
-            'content' => $content,
-        ];
-    }
-
-    $messages[] = [
-        'role'    => 'user',
-        'content' => $mensagem,
-    ];
-
-    try {
-        $client = new \GuzzleHttp\Client([
-            'timeout' => 15,
-        ]);
-
-        $response = $client->post(Config::OPENROUTER_API_URL, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $apiKey,
-                'Content-Type'  => 'application/json',
-                'HTTP-Referer'  => 'http://localhost',
-                'X-Title'       => 'Rei da Esfirra Bot',
-            ],
-            'json' => [
-                'model'      => Config::OPENROUTER_MODEL,
-                'max_tokens' => Config::CHATBOT_MAX_TOKENS,
-                'messages'   => $messages,
-            ],
-        ]);
+    $ch = curl_init(Config::OPENROUTER_API_URL);
+    curl_setopt_array($ch, [
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_POST           => true,
+        CURLOPT_POSTFIELDS     => $payload,
+        CURLOPT_TIMEOUT        => 30,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
+        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+        CURLOPT_HTTPHEADER     => [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apiKey,
+            'HTTP-Referer: http://localhost',
+            'X-Title: Rei da Esfirra Bot',
+        ],
+    ]);
 
         $data = json_decode(
             $response->getBody()->getContents(),
             true
         );
 
-        return $data['choices'][0]['message']['content'] ?? null;
-
-    } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-        error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
-        return null;
+    if ($error || $httpCode !== 200) {
+        return "🚨 *DEBUG API* 🚨\nErro: $error\nCódigo HTTP: $httpCode\nResposta: $response";
     }
+
+    $data = json_decode($response, true);
+    return $data['choices'][0]['message']['content'] ?? "A IA processou, mas não retornou texto.";
 }
+
 
 // ─────────────────────────────────────────────────────────────
 // 5b. CHAMAR OPENROUTER COM GUZZLE (opcional / com Composer)
