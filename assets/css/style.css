@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════
-   REI DA ESFIRRA v6 — DOURADO & VERMELHO
+   REY DA ESFIRRA
    Branco Limpo · Vermelho Lanchonete · Botões Dourados
    Fontes: Fraunces (display) + Plus Jakarta Sans (body)
 ═══════════════════════════════════════════════════════════ */
@@ -1740,4 +1740,71 @@ a.whatsapp-float:hover {
   margin: 0 !important; 
   transform: none !important; /* Trava animações que causam tremulação */
   word-break: keep-all !important; /* Evita que a palavra se quebre ao meio */
+}
+
+/* ══════════════════════════════════════════════════════════════
+   AJUSTES DA REVISÃO DE FRONTEND
+   (bloco acrescentado ao final — não altera nada acima)
+══════════════════════════════════════════════════════════════ */
+
+/* 1) Tokens que eram USADOS mas nunca definidos.
+   --neon: verde do "Grátis 🎉" (carrinho/pedido)
+   --secondary: destaque das respostas via IA (chatbot) */
+:root {
+  --neon: #22c55e;
+  --secondary: #e67e22;
+}
+
+/* 2) Hero agora tem texto (h1 + subtítulo + CTA) sobre o vídeo.
+   Fundo escuro evita "flash branco" antes do vídeo carregar. */
+.hero-video { background: #1a1a1a; }
+
+.hero-video .hero-content {
+  text-align: center;
+  padding: 0 20px;
+  max-width: 760px;
+  margin-bottom: 70px; /* espaço para a barra de categorias no rodapé do hero */
+}
+.hero-video .hero-content .hero-title {
+  font-family: var(--font-display);
+  color: #fff;
+  font-size: clamp(2rem, 5vw, 3.4rem);
+  line-height: 1.1;
+  margin: 0 0 14px;
+  text-shadow: 0 2px 16px rgba(0, 0, 0, 0.55);
+}
+.hero-video .hero-content .hero-sub {
+  color: #f1f1f1;
+  font-size: clamp(1rem, 2.2vw, 1.2rem);
+  margin: 0 0 24px;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.55);
+}
+
+/* 3) Acessibilidade: foco visível por teclado (antes havia outline:none).
+   :focus-visible só aparece na navegação por teclado, não no clique. */
+:focus-visible {
+  outline: 3px solid var(--gold-bright);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+/* 4) Ícones sociais agora são SVG inline (Font Awesome foi removido) */
+.social-btn svg { width: 20px; height: 20px; flex-shrink: 0; }
+
+/* 5) Breakpoint para celulares pequenos (<480px) */
+@media (max-width: 480px) {
+  .hero-video .hero-content .hero-title { font-size: 2rem; }
+  .produtos-grid { grid-template-columns: 1fr; }
+  .section-title { font-size: 1.6rem; }
+  .cta-inner { text-align: center; }
+}
+
+/* 6) Respeita quem prefere menos animação (acessibilidade) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -1,7 +1,23 @@
 /**
  * assets/js/app.js
- * Orquestrador principal da aplicação - VERSÃO RESTAURADA
+ * Orquestrador principal da aplicação.
+ *
+ * Ajustes da revisão:
+ *  - esc(): escapa dados antes de ir para innerHTML (anti-XSS no cardápio/carrinho)
+ *  - carrinho: botões via delegação de eventos (sem onclick inline)
+ *  - removido o bloco morto do #heroAddBtn (o hero agora usa um link <a>)
  */
+
+// ── Utilitário anti-XSS ──────────────────────────
+// Escapa caracteres perigosos antes de inserir via innerHTML.
+function esc(s) {
+  return String(s ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
 
 // ── Namespace UI (utilitários compartilhados) ────
 const UI = (() => {
@@ -57,19 +73,8 @@ const UI = (() => {
 // ── Cardápio ────────────────────────────────────
 const Cardapio = (() => {
   const RATINGS = [
-    "4.9",
-    "4.8",
-    "4.7",
-    "4.9",
-    "4.8",
-    "5.0",
-    "4.7",
-    "4.6",
-    "4.8",
-    "4.9",
-    "5.0",
-    "4.7",
-    "4.8",
+    "4.9", "4.8", "4.7", "4.9", "4.8", "5.0", "4.7",
+    "4.6", "4.8", "4.9", "5.0", "4.7", "4.8",
   ];
   let todosProdutos = [];
 
@@ -104,15 +109,19 @@ const Cardapio = (() => {
       const card = document.createElement("div");
       card.className = "produto-card";
       card.style.animationDelay = `${i * 0.04}s`;
+      // Valores do banco são escapados com esc() antes de entrar no HTML.
+      const nome = esc(p.nome);
+      const desc = esc(p.descricao || "");
+      const img = esc(p.imagem || "carne.webp");
       card.innerHTML = `
         <div class="produto-img-wrap">
-          <img src="assets/images/${p.imagem || 'carne.webp'}" alt="${p.nome}" loading="lazy" onerror="this.onerror=null; this.src='assets/images/carne.webp';">
+          <img src="assets/images/${img}" alt="${nome}" loading="lazy" onerror="this.onerror=null; this.src='assets/images/carne.webp';">
           <div class="produto-img-overlay"></div>
           <div class="produto-preco-overlay">R$ ${preco}</div>
         </div>
         <div class="produto-body">
-          <div class="produto-nome">${p.nome}</div>
-          <div class="produto-desc">${p.descricao || ""}</div>
+          <div class="produto-nome">${nome}</div>
+          <div class="produto-desc">${desc}</div>
           <div class="produto-footer">
             <span class="produto-rating">★ ${rating}</span>
             <button class="btn-add-cart">+ Adicionar</button>
@@ -166,13 +175,30 @@ const Cardapio = (() => {
 })();
 
 // ── Sidebar do carrinho ─────────────────────────
-// ── Sidebar do carrinho ─────────────────────────
 const CartUI = (() => {
   function init() {
     document.getElementById("cartToggle")?.addEventListener("click", abrir);
     document.getElementById("cartClose")?.addEventListener("click", fechar);
     document.getElementById("cartOverlay")?.addEventListener("click", fechar);
     window.addEventListener("cart:update", (e) => _renderizar(e.detail));
+
+    // Delegação: um único listener trata todos os botões dos itens,
+    // mesmo os que ainda nem foram criados. Substitui os onclick inline.
+    document
+      .getElementById("cartItems")
+      ?.addEventListener("click", _onItemClick);
+  }
+
+  // Lê data-acao / data-id do botão clicado e chama o Cart.
+  function _onItemClick(e) {
+    const btn = e.target.closest("[data-acao]");
+    if (!btn) return;
+    const id = Number(btn.dataset.id);
+    switch (btn.dataset.acao) {
+      case "inc": Cart.alterarQuantidade(id, 1); break;
+      case "dec": Cart.alterarQuantidade(id, -1); break;
+      case "del": Cart.remover(id); break;
+    }
   }
 
   function abrir() {
@@ -212,14 +238,12 @@ const CartUI = (() => {
           </svg>
           <p style="color: var(--text-main); font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">Seu pedido está vazio</p>
           <small style="color: var(--text-muted); font-size: 0.9rem;">Explore o nosso cardápio e monte o seu pedido.</small>
-          <a href="javascript:void(0)" class="btn-voltar-compras" id="btnVoltarVazio" style="display: block; text-align: center; margin-top: 20px; font-weight: 600; color: var(--text-muted); text-decoration: none;">← Continuar Comprando</a>
+          <button type="button" class="btn-voltar-compras" id="btnVoltarVazio" style="display:block; width:auto; margin-top: 20px; font-weight: 600; background:transparent; border:none; color: var(--text-muted); cursor:pointer;">← Continuar Comprando</button>
         </div>`;
 
-      setTimeout(() => {
-        document
-          .getElementById("btnVoltarVazio")
-          ?.addEventListener("click", fechar);
-      }, 0);
+      document
+        .getElementById("btnVoltarVazio")
+        ?.addEventListener("click", fechar);
 
       if (footerEl) footerEl.style.display = "none";
       return;
@@ -228,19 +252,22 @@ const CartUI = (() => {
     itens.forEach((item) => {
       const el = document.createElement("div");
       el.className = "cart-item";
+      const nome = esc(item.nome);
+      const img = esc(item.imagem || "carne.webp");
+      // Botões usam data-acao/data-id; o clique é tratado por delegação.
       el.innerHTML = `
         <div class="ci-img">
-          <img src="assets/images/${item.imagem}" onerror="this.src='assets/images/carne.webp'" alt="${item.nome}">
+          <img src="assets/images/${img}" onerror="this.onerror=null; this.src='assets/images/carne.webp'" alt="${nome}">
         </div>
         <div class="ci-info">
-          <div class="ci-nome">${item.nome}</div>
+          <div class="ci-nome">${nome}</div>
           <div class="ci-preco">R$ ${(item.preco * item.quantidade).toFixed(2).replace(".", ",")}</div>
         </div>
         <div class="ci-controls">
-          <button class="ci-btn" onclick="Cart.alterarQuantidade(${item.produto_id}, -1)">−</button>
+          <button class="ci-btn" data-acao="dec" data-id="${item.produto_id}" aria-label="Diminuir quantidade">−</button>
           <span class="ci-qty">${item.quantidade}</span>
-          <button class="ci-btn" onclick="Cart.alterarQuantidade(${item.produto_id}, 1)">+</button>
-          <button class="ci-del" onclick="Cart.remover(${item.produto_id})">✕</button>
+          <button class="ci-btn" data-acao="inc" data-id="${item.produto_id}" aria-label="Aumentar quantidade">+</button>
+          <button class="ci-del" data-acao="del" data-id="${item.produto_id}" aria-label="Remover item">✕</button>
         </div>`;
 
       itemsEl.appendChild(el);
@@ -302,13 +329,6 @@ const Navbar = (() => {
   return { init };
 })();
 
-// ── Chatbot ─────────────────────────────────────
-
-//apagado para teste 
-
-
-
-
 // ── Bootstrap ────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   Navbar.init();
@@ -319,29 +339,10 @@ document.addEventListener("DOMContentLoaded", () => {
   Cardapio.carregar();
   UI.initScrollReveal();
 
-  const heroBtn = document.getElementById("heroAddBtn");
-  if (heroBtn) {
-    heroBtn.addEventListener("click", () => {
-      Cart.adicionar({
-        produto_id: 1,
-        nome: "Esfirra de Carne",
-        preco: 7.5,
-        imagem: "carne.png",
-      });
-      heroBtn.textContent = "✓ Adicionado";
-      heroBtn.style.background = "#28a745";
-      heroBtn.style.color = "#fff";
-      setTimeout(() => CartUI.abrir(), 400);
-      setTimeout(() => {
-        heroBtn.textContent = "+ Adicionar";
-        heroBtn.style.background = "";
-        heroBtn.style.color = "";
-      }, 2000);
-    });
-  }
   document
     .getElementById("btnVoltarCompras")
     ?.addEventListener("click", () => CartUI.fechar());
+
   document
     .querySelector(".mapa-card")
     ?.addEventListener("click", () =>
