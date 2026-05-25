@@ -186,7 +186,7 @@ function respostaPadrao(): array
  * @param  string $mensagem  Mensagem do usuario
  * @return string|null       Resposta da IA ou null em caso de falha
  */
-function chamarOpenRouter(string $mensagem): ?string
+function chamarOpenRouter(string $mensagem, array $historico = []): ?string
 {
     $apiKey = Config::OPENROUTER_API_KEY;
 
@@ -221,10 +221,10 @@ function chamarOpenRouter(string $mensagem): ?string
         ],
     ]);
 
-    $response = curl_exec($ch);
-    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $error    = curl_error($ch);
-    curl_close($ch);
+        $data = json_decode(
+            $response->getBody()->getContents(),
+            true
+        );
 
     if ($error || $httpCode !== 200) {
         return "🚨 *DEBUG API* 🚨\nErro: $error\nCódigo HTTP: $httpCode\nResposta: $response";
@@ -247,37 +247,37 @@ function chamarOpenRouter(string $mensagem): ?string
  * @param  string $mensagem
  * @return string|null
  */
-function chamarOpenRouterGuzzle(string $mensagem): ?string
+function chamarOpenRouterGuzzle(string $mensagem, array $historico = []): ?string
 {
-    // Descomente as linhas abaixo apos instalar o Guzzle:
-    //
-    // $client = new \GuzzleHttp\Client(['timeout' => 15]);
-    //
-    // try {
-    //     $response = $client->post(Config::OPENROUTER_API_URL, [
-    //         'headers' => [
-    //             'Authorization' => 'Bearer ' . Config::OPENROUTER_API_KEY,
-    //             'Content-Type'  => 'application/json',
-    //             'HTTP-Referer'  => 'http://localhost',
-    //             'X-Title'       => 'Rei da Esfirra Bot',
-    //         ],
-    //         'json' => [
-    //             'model'      => Config::OPENROUTER_MODEL,
-    //             'max_tokens' => Config::CHATBOT_MAX_TOKENS,
-    //             'messages'   => [
-    //                 ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
-    //                 ['role' => 'user',   'content' => $mensagem],
-    //             ],
-    //         ],
-    //     ]);
-    //
-    //     $data = json_decode($response->getBody()->getContents(), true);
-    //     return $data['choices'][0]['message']['content'] ?? null;
-    //
-    // } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-    //     error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
-    //     return null;
-    // }
+    
+     $client = new \GuzzleHttp\Client(['timeout' => 15]);
+    
+     try {
+         $response = $client->post(Config::OPENROUTER_API_URL, [
+             'headers' => [
+                 'Authorization' => 'Bearer ' . Config::OPENROUTER_API_KEY,
+                 'Content-Type'  => 'application/json',
+                 'HTTP-Referer'  => 'http://localhost',
+                 'X-Title'       => 'Rei da Esfirra Bot',
+             ],
+             'json' => [
+                 'model'      => Config::OPENROUTER_MODEL,
+                 'max_tokens' => Config::CHATBOT_MAX_TOKENS,
+                 'messages'   => [
+                     ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
+                     ['role' => 'user',   'content' => $mensagem],
+                 ],
+             ],
+         ]);
+    
+         $data = json_decode($response->getBody()->getContents(), true);
+         return $data['choices'][0]['message']['content'] ?? null;
+    
+     } catch (\GuzzleHttp\Exception\GuzzleException $e) {
+         error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
+         return null;
+     }
 
-    return null; // remova esta linha ao descomentar o bloco acima
+return null;
+
 }

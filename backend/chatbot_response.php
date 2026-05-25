@@ -35,27 +35,35 @@ use Core\Config;
 use Models\ChatMessage;
 use Models\ChatbotOption;
 
-// ── Valida metodo ─────────────────────────────────────────────
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    http_response_code(405);
-    echo json_encode(formatarErro('Metodo nao permitido.'));
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+    http_response_code(204);
     exit;
 }
 
-// ── Le e valida payload JSON ──────────────────────────────────
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    http_response_code(405);
+    echo json_encode(formatarErro('Metodo nao permitido.'), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $raw  = file_get_contents('php://input');
 $body = json_decode($raw, true);
 
-$mensagem = trim($body['mensagem'] ?? '');
-$sessaoId = trim($body['sessao_id'] ?? 'anonimo');
-
-if ($mensagem === '') {
-    http_response_code(422);
-    echo json_encode(formatarErro('Mensagem vazia.'));
+if (!is_array($body)) {
+    http_response_code(400);
+    echo json_encode(formatarErro('JSON invalido.'), JSON_UNESCAPED_UNICODE);
     exit;
 }
 
-// ── Normaliza mensagem para comparacao ────────────────────────
+$mensagem = trim((string) ($body['mensagem'] ?? ''));
+$sessaoId = trim((string) ($body['sessao_id'] ?? 'anonimo'));
+
+if ($mensagem === '') {
+    http_response_code(422);
+    echo json_encode(formatarErro('Mensagem vazia.'), JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
 $mensagemNorm = mb_strtolower($mensagem, 'UTF-8');
 
 try {
@@ -63,7 +71,10 @@ try {
     $chatMessageModel   = new ChatMessage();
     $chatbotOptionModel = new ChatbotOption();
 
-    // 1. Salva mensagem do usuario no banco
+    /**
+     * Salva mensagem do usuário antes de buscar histórico,
+     * permitindo que a sessão fique completa no banco.
+     */
     $chatMessageModel->salvar($mensagem, 'user', $sessaoId);
 
     // 2. Detecta intencao manual
@@ -81,7 +92,7 @@ try {
     }
 
     $respostaTexto = null;
-    $tipo          = 'bot';
+    $tipo = 'bot';
 
     if ($keyword !== null) {
         // 3a. Encontrou keyword — busca resposta manual 
@@ -103,14 +114,14 @@ try {
     }
 
     if ($respostaTexto === null) {
-        // 5. Fallback: resposta padrao com botoes de acao rapida
         $payload = respostaPadrao();
+
         $chatMessageModel->salvar($payload['texto'], 'bot', $sessaoId);
-        echo json_encode($payload);
+
+        echo json_encode($payload, JSON_UNESCAPED_UNICODE);
         exit;
     }
 
-    // 6. Salva resposta no banco
     $chatMessageModel->salvar($respostaTexto, $tipo, $sessaoId);
 
     // 7. Retorna JSON ao frontend

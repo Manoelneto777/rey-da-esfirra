@@ -106,7 +106,7 @@ const Cardapio = (() => {
       card.style.animationDelay = `${i * 0.04}s`;
       card.innerHTML = `
         <div class="produto-img-wrap">
-          <img src="assets/images/${p.imagem}" alt="${p.nome}" loading="lazy" onerror="this.src='assets/images/carne.svg'">
+          <img src="assets/images/${p.imagem || 'carne.webp'}" alt="${p.nome}" loading="lazy" onerror="this.onerror=null; this.src='assets/images/carne.webp';">
           <div class="produto-img-overlay"></div>
           <div class="produto-preco-overlay">R$ ${preco}</div>
         </div>
@@ -166,50 +166,42 @@ const Cardapio = (() => {
 })();
 
 // ── Sidebar do carrinho ─────────────────────────
+// ── Sidebar do carrinho ─────────────────────────
 const CartUI = (() => {
-  function finalizarPedido() {
-    // 1. FECHA O CARRINHO AUTOMATICAMENTE
-    // Usamos a lógica que já sabemos que funciona: remover a classe 'open'
-    document.getElementById("cartSidebar").classList.remove("open");
-    document.getElementById("cartOverlay").classList.remove("open");
-
-    // 2. ABRE O MODAL DE INFORMAÇÕES
-    // Aqui você chama a função ou abre a classe do seu modal
-    const modal = document.getElementById("modalPedido"); // Verifique se o ID é este mesmo
-    if (modal) {
-      modal.classList.add("open");
-      // Se houver um overlay separado para o modal, abra-o também:
-      document.getElementById("modalOverlay").classList.add("open");
-    }
-
-  }
   function init() {
     document.getElementById("cartToggle")?.addEventListener("click", abrir);
     document.getElementById("cartClose")?.addEventListener("click", fechar);
     document.getElementById("cartOverlay")?.addEventListener("click", fechar);
     window.addEventListener("cart:update", (e) => _renderizar(e.detail));
   }
+
   function abrir() {
     document.getElementById("cartSidebar")?.classList.add("open");
     document.getElementById("cartOverlay")?.classList.add("open");
   }
+
   function fechar() {
     document.getElementById("cartSidebar")?.classList.remove("open");
     document.getElementById("cartOverlay")?.classList.remove("open");
   }
+
   function _renderizar({ itens, total, unidades }) {
     const badge = document.getElementById("cartBadge");
     if (badge) badge.textContent = unidades;
 
     const sub = document.getElementById("cartHeaderSub");
-    if (sub)
+    if (sub) {
       sub.textContent = unidades
         ? `${unidades} ${unidades === 1 ? "item" : "itens"}`
         : "Vazio";
+    }
+
     const itemsEl = document.getElementById("cartItems");
     const footerEl = document.getElementById("cartFooter");
     if (!itemsEl) return;
+
     itemsEl.innerHTML = "";
+
     if (!itens.length) {
       itemsEl.innerHTML = `
         <div class="cart-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
@@ -222,21 +214,24 @@ const CartUI = (() => {
           <small style="color: var(--text-muted); font-size: 0.9rem;">Explore o nosso cardápio e monte o seu pedido.</small>
           <a href="javascript:void(0)" class="btn-voltar-compras" id="btnVoltarVazio" style="display: block; text-align: center; margin-top: 20px; font-weight: 600; color: var(--text-muted); text-decoration: none;">← Continuar Comprando</a>
         </div>`;
-      setTimeout(
-        () =>
-          document
-            .getElementById("btnVoltarVazio")
-            ?.addEventListener("click", fechar),
-        0,
-      );
+
+      setTimeout(() => {
+        document
+          .getElementById("btnVoltarVazio")
+          ?.addEventListener("click", fechar);
+      }, 0);
+
       if (footerEl) footerEl.style.display = "none";
       return;
     }
+
     itens.forEach((item) => {
       const el = document.createElement("div");
       el.className = "cart-item";
       el.innerHTML = `
-        <div class="ci-img"><img src="assets/images/${item.imagem}" onerror="this.src='assets/images/carne.svg'" alt="${item.nome}"></div>
+        <div class="ci-img">
+          <img src="assets/images/${item.imagem}" onerror="this.src='assets/images/carne.webp'" alt="${item.nome}">
+        </div>
         <div class="ci-info">
           <div class="ci-nome">${item.nome}</div>
           <div class="ci-preco">R$ ${(item.preco * item.quantidade).toFixed(2).replace(".", ",")}</div>
@@ -247,22 +242,29 @@ const CartUI = (() => {
           <button class="ci-btn" onclick="Cart.alterarQuantidade(${item.produto_id}, 1)">+</button>
           <button class="ci-del" onclick="Cart.remover(${item.produto_id})">✕</button>
         </div>`;
+
       itemsEl.appendChild(el);
     });
+
     if (footerEl) {
       footerEl.style.display = "block";
+
       const taxa = total >= 60 ? 0 : 5;
+
       document.getElementById("subtotalValue").textContent =
         `R$ ${total.toFixed(2).replace(".", ",")}`;
+
       document.getElementById("entregaValue").innerHTML =
         taxa === 0
           ? '<span style="color:var(--neon);font-weight:700">Grátis 🎉</span>'
           : `R$ ${taxa.toFixed(2).replace(".", ",")}`;
+
       document.getElementById("totalValue").textContent =
         `R$ ${(total + taxa).toFixed(2).replace(".", ",")}`;
     }
   }
-  return { init, abrir, fechar, finalizarPedido };
+
+  return { init, abrir, fechar };
 })();
 
 // ── Navbar ──────────────────────────────────────
