@@ -2,109 +2,101 @@
 /**
  * backend/chat_helpers.php
  *
- * Funcoes auxiliares do chatbot.
+ * Funções auxiliares do chatbot (sem estado, fáceis de testar).
  * Responsabilidades:
- *  - detectarIntencao()   : identifica palavras-chave na mensagem
- *  - buscarRespostaManual(): consulta chatbot_options no banco
- *  - formatarResposta()   : padroniza a resposta final
- *  - chamarOpenRouter()   : integra com a API de IA
+ *   - autoload simples das classes (Core\* e Models\*)
+ *   - detectarIntencao()        : transforma a frase do usuário numa "intenção"
+ *   - respostaManualFallback()  : textos manuais embutidos (rede de segurança)
+ *   - formatarResposta()/Erro() : padronizam o JSON devolvido ao front
+ *   - respostaPadraoTexto()     : fallback quando nada é entendido
+ *   - chamarOpenRouter()        : integra com a IA via cURL (corrigido)
  */
 
 use Core\Config;
-use Models\ChatbotOption;
 
-// ─── Autoload simples (sem Composer) ────────────────────────
+// ─────────────────────────────────────────────────────────────
+// AUTOLOAD SIMPLES (sem Composer)
+// Converte "Core\Config" em "backend/Core/Config.php" e carrega.
+// Fica aqui porque chat_helpers.php é sempre o primeiro require do endpoint.
+// ─────────────────────────────────────────────────────────────
 spl_autoload_register(function (string $class): void {
-    $base = __DIR__;
-    $file = $base . '/' . str_replace('\\', '/', $class) . '.php';
+    $file = __DIR__ . '/' . str_replace('\\', '/', $class) . '.php';
     if (file_exists($file)) {
         require_once $file;
     }
 });
 
 // ─────────────────────────────────────────────────────────────
-// 1. DETECTAR INTENCAO
-// Retorna a primeira keyword encontrada na mensagem do usuario
+// 1. DETECTAR INTENÇÃO
+// Recebe a mensagem JÁ normalizada (minúscula) e devolve uma
+// "intenção" canônica, ou null se não reconhecer nada.
+//
+// Mantemos os dois jeitos de escrever (com e sem acento) porque o
+// usuário digita de tudo. A intenção retornada é sempre SEM acento,
+// para casar com a coluna `intencao` do banco.
 // ─────────────────────────────────────────────────────────────
-
-/**
- * Varre o texto do usuario e retorna a primeira keyword
- * que aparecer na base de chatbot_options.
- *
- * @param  string $mensagem   Texto do usuario (ja em lowercase)
- * @param  array  $opcoes     Resultado de ChatbotOption::listarAtivas()
- * @return string|null        Keyword encontrada ou null
- */
-function detectarIntencao(string $mensagem, array $opcoes): ?string
+function detectarIntencao(string $mensagemNorm): ?string
 {
-    foreach ($opcoes as $opcao) {
-        $keyword = mb_strtolower(trim($opcao['keyword']));
-        if ($keyword !== '' && str_contains($mensagem, $keyword)) {
-            return $keyword;
+    // mapa: intenção canônica => lista de termos que a disparam
+    $mapa = [
+        'cardapio'    => ['cardapio', 'cardápio', 'menu', 'sabores'],
+        'horarios'    => ['horario', 'horário', 'aberto', 'funciona', 'fecha'],
+        'localizacao' => ['local', 'endereço', 'endereco', 'onde fica', 'localiza'],
+        'precos'      => ['preco', 'preço', 'valor', 'quanto custa'],
+        'delivery'    => ['delivery', 'entrega', 'taxa', 'frete'],
+    ];
+
+    foreach ($mapa as $intencao => $termos) {
+        foreach ($termos as $termo) {
+            if (str_contains($mensagemNorm, $termo)) {
+                return $intencao; // primeira intenção encontrada vence
+            }
         }
     }
-    return null;
+
+    return null; // nada reconhecido → vai pra IA ou pro fallback padrão
 }
 
 // ─────────────────────────────────────────────────────────────
-// 2. BUSCAR RESPOSTA MANUAL
-// Consulta o banco pela keyword detectada
+// 2. FALLBACK MANUAL (rede de segurança)
+// O ChatService busca a resposta PRIMEIRO no banco (chatbot_options).
+// Se a linha não existir (ex.: seed não rodou), caímos aqui.
+// Assim o chat funciona em qualquer máquina, mesmo sem popular a tabela.
 // ─────────────────────────────────────────────────────────────
-
-/**
- * Busca a resposta manual no banco a partir da keyword.
- *
- * @param  string $keyword
- * @return string|null  Resposta encontrada ou null
- */
-function buscarRespostaManual(string $keyword): ?string {
-    switch ($keyword) {
+function respostaManualFallback(string $intencao): ?string
+{
+    switch ($intencao) {
         case 'cardapio':
-            return "👑 *Nosso Cardápio Atualizado*\n\n" .
-                   "🍕 *Tradicionais:* a partir de R$ 6,50\n" .
-                   "(Carne, Frango, Queijo, Calabresa)\n\n" .
-
-                   "✨ *Especiais:* a partir de R$ 8,50\n" .
-                   "(Palmito, Atum)\n\n" .
-
-                   "🍤 *Premium:* Valor de R$ 12,00\n" .
-                   "(Camarão)\n\n" .
-
-                   "🍫 *Doces:* a partir de R$ 7,50\n" .
-                   "(Chocolate, Queijo com Goiabada)\n\n" .
-
-                   "🍟 *Combos da Galera:*\n" .
-                   "10 un. por R$ 65,00\n" .
-                   "20 un. Mix por R$ 120,00\n\n" .
-                   
-                   "🛵 *Taxa de entrega:* R$ 5,00 (Grátis acima de R$ 60)\n\n" .
+            return "👑 *Nosso Cardápio*\n\n" .
+                   "🍕 *Tradicionais:* a partir de R$ 6,50 (Carne, Frango, Queijo, Calabresa)\n" .
+                   "✨ *Especiais:* a partir de R$ 8,50 (Palmito, Atum)\n" .
+                   "🍤 *Premium:* R$ 12,00 (Camarão)\n" .
+                   "🍫 *Doces:* a partir de R$ 7,00 (Banana, Chocolate)\n" .
+                   "🍟 *Combos:* 10 un. R$ 65,00 · 20 un. Mix R$ 120,00\n\n" .
                    "Qual sabor vai matar sua fome hoje?";
-        
+
         case 'horarios':
-            return "⏰ *Nossos Horários de Funcionamento:*\n\n" .
-                   "Segunda a Quinta: 13h às 22:30h\n" .
-                   "Sexta e Sábado: 13h às 23h\n" .
-                   "Domingo: 13h às 22h\n\n" .
-                   "Fornos sempre quentes pra você!";
-        
+            return "⏰ *Horários*\n\n" .
+                   "Seg a Qui: 13h às 22:30h\n" .
+                   "Sex e Sáb: 13h às 23h\n" .
+                   "Domingo: 13h às 22h";
+
         case 'localizacao':
-            return "📍 *Onde Estamos:*\n\n" .
+            return "📍 *Onde estamos*\n\n" .
                    "Avenida Principal, 580 — Centro\n" .
-                   "Capoeiruçu — Bahia\n\n" .
-                   "Venha nos fazer uma visita ou peça pelo Delivery!";
-                   
+                   "Capoeiruçu — Bahia";
+
         case 'precos':
-            return "💰 *Nossos Preços Base:*\n\n" .
+            return "💰 *Preços base*\n\n" .
                    "Esfirras a partir de R$ 6,50.\n" .
-                   "Refrigerantes a partir de R$ 5,00.\n\n" .
-                   "Acesse a opção *Cardápio* para ver todos os detalhes!";
-                   
+                   "Refrigerantes a partir de R$ 5,00.\n" .
+                   "Toque em *Cardápio* para ver tudo!";
+
         case 'delivery':
-            return "🛵 *Sobre o nosso Delivery:*\n\n" .
-                   "Entregamos em Capoeiruçu e região.\n" .
-                   "Tempo médio: 30 a 50 minutos.\n" .
-                   "Taxa: R$ 5,00 (Grátis para pedidos acima de R$ 60,00).\n" .
-                   "Pedido Mínimo: R$ 25,00.";
+            return "🛵 *Delivery*\n\n" .
+                   "Tempo médio: 30 a 50 min.\n" .
+                   "Taxa: R$ 5,00 (grátis acima de R$ 60).\n" .
+                   "Pedido mínimo: R$ 25,00.";
 
         default:
             return null;
@@ -112,16 +104,15 @@ function buscarRespostaManual(string $keyword): ?string {
 }
 
 // ─────────────────────────────────────────────────────────────
-// 3. FORMATAR RESPOSTA
-// Padroniza o payload JSON de retorno ao frontend
+// 3. FORMATADORES DE RESPOSTA (padronização do JSON)
 // ─────────────────────────────────────────────────────────────
 
 /**
- * Cria o array de resposta padronizado.
+ * Monta o payload de sucesso devolvido ao frontend.
  *
- * @param  string $texto  Texto da resposta
- * @param  string $tipo   'bot' (manual) | 'ai' (inteligencia artificial)
- * @param  array  $botoes Botoes de acao rapida opcionais
+ * @param  string $texto   Texto da resposta
+ * @param  string $tipo    'bot' (manual) | 'ai' (inteligência artificial)
+ * @param  array  $botoes  Botões de ação rápida (opcional)
  * @return array
  */
 function formatarResposta(string $texto, string $tipo = 'bot', array $botoes = []): array
@@ -135,63 +126,49 @@ function formatarResposta(string $texto, string $tipo = 'bot', array $botoes = [
 }
 
 /**
- * Cria o payload de erro padronizado.
+ * Monta o payload de erro. O motivo técnico vai em 'erro' (pro dev ver no
+ * F12/log); o cliente final só lê a mensagem amigável de 'texto'.
  *
- * @param  string $mensagem
+ * @param  string $motivoTecnico
  * @return array
  */
-
-function formatarErro(string $mensagem): array
+function formatarErro(string $motivoTecnico): array
 {
     return [
         'sucesso' => false,
-        'erro'    => $mensagem, // O erro real fica oculto aqui para o dev ler no F12
-        'texto'   => 'Desculpe, ocorreu um erro de conexão. Tente novamente.', // O cliente só vê isso
+        'erro'    => $motivoTecnico,
+        'texto'   => 'Desculpe, tivemos um probleminha aqui. Tente novamente. 🙏',
         'tipo'    => 'bot',
     ];
 }
 
-// ─────────────────────────────────────────────────────────────
-// 4. RESPOSTA PADRAO
-// Quando nenhuma keyword e encontrada e IA esta desligada
-// ─────────────────────────────────────────────────────────────
-
 /**
- * Retorna a resposta padrao (fallback) com botoes de acao rapida.
- *
- * @return array
+ * Texto padrão quando o bot não entende e a IA não respondeu.
+ * @return string
  */
-function respostaPadrao(): array
+function respostaPadraoTexto(): string
 {
-    return formatarResposta(
-        'Nao entendi muito bem. Posso te ajudar com:',
-        'bot',
-        ['Cardapio', 'Horarios', 'Localizacao', 'Preco', 'Delivery']
-    );
+    return 'Não entendi muito bem 🤔. Posso te ajudar com Cardápio, Horários, ' .
+           'Localização, Preços ou Delivery — é só tocar num botão abaixo!';
 }
 
 // ─────────────────────────────────────────────────────────────
-// 5. CHAMAR OPENROUTER (IA)
-// Integra com a API via cURL (sem dependencia de Guzzle)
+// 4. CHAMAR OPENROUTER (IA) — VERSÃO CORRIGIDA
+//
+// A versão antiga estava quebrada: nunca executava curl_exec() e
+// usava variáveis ($response, $error, $httpCode) que não existiam,
+// misturando estilo Guzzle com cURL. Aqui o fluxo está completo:
+//   init → setopt → exec → lê código HTTP e erro → close.
+// Em qualquer falha retornamos null para o ChatService cair no manual.
 // ─────────────────────────────────────────────────────────────
-
-/**
- * Envia a mensagem do usuario para a API OpenRouter e retorna
- * a resposta gerada pela IA.
- *
- * Usa cURL nativo do PHP para evitar dependencia do Composer.
- * Se a chave API estiver configurada via Composer/Guzzle,
- * veja a funcao chamarOpenRouterGuzzle() abaixo.
- *
- * @param  string $mensagem  Mensagem do usuario
- * @return string|null       Resposta da IA ou null em caso de falha
- */
-function chamarOpenRouter(string $mensagem, array $historico = []): ?string
+function chamarOpenRouter(string $mensagem): ?string
 {
     $apiKey = Config::OPENROUTER_API_KEY;
 
+    // Sem chave configurada → não tenta (deixa o manual assumir).
     if (empty($apiKey) || str_contains($apiKey, 'COLE_SUA_CHAVE_AQUI')) {
-        return "⚠️ Chave da API não configurada.";
+        error_log('[OpenRouter] Chave de API ausente.');
+        return null;
     }
 
     $payload = json_encode([
@@ -201,7 +178,7 @@ function chamarOpenRouter(string $mensagem, array $historico = []): ?string
             ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
             ['role' => 'user',   'content' => $mensagem],
         ],
-    ]);
+    ], JSON_UNESCAPED_UNICODE);
 
     $ch = curl_init(Config::OPENROUTER_API_URL);
     curl_setopt_array($ch, [
@@ -209,10 +186,10 @@ function chamarOpenRouter(string $mensagem, array $historico = []): ?string
         CURLOPT_POST           => true,
         CURLOPT_POSTFIELDS     => $payload,
         CURLOPT_TIMEOUT        => 30,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_SSL_VERIFYHOST => false,
-        CURLOPT_IPRESOLVE      => CURL_IPRESOLVE_V4,
-        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+        // Em produção o ideal é manter a verificação TLS LIGADA
+        // (CURLOPT_SSL_VERIFYPEER => true) e apontar um CA bundle.
+        // Deixe false só se o ambiente local não tiver certificados.
+        CURLOPT_SSL_VERIFYPEER => true,
         CURLOPT_HTTPHEADER     => [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $apiKey,
@@ -221,63 +198,19 @@ function chamarOpenRouter(string $mensagem, array $historico = []): ?string
         ],
     ]);
 
-        $data = json_decode(
-            $response->getBody()->getContents(),
-            true
-        );
+    $response = curl_exec($ch);                              // <- ESTAVA FALTANDO
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    $erroCurl = curl_error($ch);
+    curl_close($ch);
 
-    if ($error || $httpCode !== 200) {
-        return "🚨 *DEBUG API* 🚨\nErro: $error\nCódigo HTTP: $httpCode\nResposta: $response";
+    // Falha de rede ou status diferente de 200 → loga e devolve null.
+    if ($response === false || $erroCurl !== '' || $httpCode !== 200) {
+        error_log("[OpenRouter] Falha — HTTP {$httpCode} | cURL: {$erroCurl} | corpo: {$response}");
+        return null;
     }
 
     $data = json_decode($response, true);
-    return $data['choices'][0]['message']['content'] ?? "A IA processou, mas não retornou texto.";
-}
 
-
-// ─────────────────────────────────────────────────────────────
-// 5b. CHAMAR OPENROUTER COM GUZZLE (opcional / com Composer)
-// Descomente e use se o Guzzle estiver instalado via Composer
-// ─────────────────────────────────────────────────────────────
-
-/**
- * Versao com Guzzle HTTP Client.
- * Requer: composer require guzzlehttp/guzzle
- *
- * @param  string $mensagem
- * @return string|null
- */
-function chamarOpenRouterGuzzle(string $mensagem, array $historico = []): ?string
-{
-    
-     $client = new \GuzzleHttp\Client(['timeout' => 15]);
-    
-     try {
-         $response = $client->post(Config::OPENROUTER_API_URL, [
-             'headers' => [
-                 'Authorization' => 'Bearer ' . Config::OPENROUTER_API_KEY,
-                 'Content-Type'  => 'application/json',
-                 'HTTP-Referer'  => 'http://localhost',
-                 'X-Title'       => 'Rei da Esfirra Bot',
-             ],
-             'json' => [
-                 'model'      => Config::OPENROUTER_MODEL,
-                 'max_tokens' => Config::CHATBOT_MAX_TOKENS,
-                 'messages'   => [
-                     ['role' => 'system', 'content' => Config::CHATBOT_SYSTEM_PROMPT],
-                     ['role' => 'user',   'content' => $mensagem],
-                 ],
-             ],
-         ]);
-    
-         $data = json_decode($response->getBody()->getContents(), true);
-         return $data['choices'][0]['message']['content'] ?? null;
-    
-     } catch (\GuzzleHttp\Exception\GuzzleException $e) {
-         error_log('[ChatBot-IA] Guzzle error: ' . $e->getMessage());
-         return null;
-     }
-
-return null;
-
+    // Estrutura esperada da OpenRouter: choices[0].message.content
+    return $data['choices'][0]['message']['content'] ?? null;
 }
