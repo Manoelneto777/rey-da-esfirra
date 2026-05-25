@@ -2,7 +2,14 @@
 /**
  * backend/Models/ChatMessage.php
  * Model da tabela chat_messages.
- * Armazena o historico de mensagens do chatbot.
+ *
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │ O QUE MUDOU EM RELAÇÃO À VERSÃO ANTERIOR                     │
+ * │ Antes o Model gravava as colunas message/sender/sessao_id,  │
+ * │ que NÃO existem na tabela. O schema real (estrutura.sql) é:  │
+ * │   id, conversation_id, usuario_id, mensagem, tipo, created_at│
+ * │ Agora os nomes batem 100% com o banco — sem "Unknown column".│
+ * └─────────────────────────────────────────────────────────────┘
  */
 
 namespace Models;
@@ -12,62 +19,80 @@ use PDO;
 
 class ChatMessage extends Model
 {
+    /** Nome da tabela (usado pelos métodos genéricos do Model base). */
     protected string $table = 'chat_messages';
 
     /**
-     * Salva uma mensagem no banco.
+     * Salva UMA mensagem da conversa.
      *
-     * @param  string $message   Texto da mensagem
-     * @param  string $sender    'user' | 'bot' | 'ai'
-     * @param  string $sessaoId  Identificador da sessao do usuario
-     * @return int               ID da mensagem inserida
+     * Repare que NÃO passamos created_at: a coluna tem
+     * DEFAULT CURRENT_TIMESTAMP no banco, então o MySQL preenche sozinho.
+     *
+     * @param  int      $conversationId  FK para chat_conversations.id
+     * @param  string   $mensagem        Texto da mensagem
+     * @param  string   $tipo            'user' | 'bot' | 'ai'
+     * @param  int|null $usuarioId       ID do usuário logado, ou null (visitante)
+     * @return int                       ID da mensagem inserida
      */
-    public function salvar(string $message, string $sender, string $sessaoId = ''): int
+    public function salvar(int $conversationId, string $mensagem, string $tipo, ?int $usuarioId = null): int
     {
+        // O Model::save() monta o INSERT a partir das CHAVES deste array.
+        // Por isso cada chave precisa ser exatamente o nome da coluna.
         return $this->save([
-            'message'   => $message,
-            'sender'    => $sender,
-            'sessao_id' => $sessaoId,
+            'conversation_id' => $conversationId,
+            'usuario_id'      => $usuarioId,   // pode ser null — o PDO grava NULL
+            'mensagem'        => $mensagem,
+            'tipo'            => $tipo,
         ]);
     }
 
     /**
-     * Retorna o historico de uma sessao.
+     * Retorna o histórico completo de uma conversa, em ordem cronológica.
+     * Útil para reabrir o chat ou enviar contexto para a IA.
      *
-     * @param  string $sessaoId
-     * @param  int    $limite   Numero maximo de mensagens
+     * Obs.: usamos bindValue com PARAM_INT no LIMIT porque o MySQL
+     * não aceita LIMIT como string vinda de placeholder.
+     *
+     * @param  int $conversationId
+     * @param  int $limite          Máximo de mensagens retornadas
      * @return array
      */
-    public function historicoDaSessao(string $sessaoId, int $limite = 50): array
+    public function historicoDaConversa(int $conversationId, int $limite = 50): array
     {
         $stmt = $this->db->prepare(
-            "SELECT * FROM {$this->table}
-              WHERE sessao_id = :sessao_id
-              ORDER BY created_at ASC
+            "SELECT id, conversation_id, usuario_id, mensagem, tipo, created_at
+               FROM {$this->table}
+              WHERE conversation_id = :cid
+              ORDER BY created_at ASC, id ASC
               LIMIT :limite"
         );
-        $stmt->bindValue(':sessao_id', $sessaoId, PDO::PARAM_STR);
-        $stmt->bindValue(':limite',    $limite,   PDO::PARAM_INT);
+
+        $stmt->bindValue(':cid',    $conversationId, PDO::PARAM_INT);
+        $stmt->bindValue(':limite', $limite,         PDO::PARAM_INT);
         $stmt->execute();
 
         return $stmt->fetchAll();
     }
 
     /**
-     * Total de mensagens por tipo de remetente.
+     * Conta quantas mensagens existem por tipo de remetente.
+     * (Bom para um futuro painel de estatísticas.)
      *
      * @return array ['user' => N, 'bot' => N, 'ai' => N]
      */
     public function estatisticas(): array
     {
         $stmt = $this->db->query(
-            "SELECT sender, COUNT(*) as total FROM {$this->table} GROUP BY sender"
+            "SELECT tipo, COUNT(*) AS total
+               FROM {$this->table}
+              GROUP BY tipo"
         );
-        $rows = $stmt->fetchAll();
 
+        // Inicia zerado para nunca retornar índice indefinido.
         $stats = ['user' => 0, 'bot' => 0, 'ai' => 0];
-        foreach ($rows as $row) {
-            $stats[$row['sender']] = (int) $row['total'];
+
+        foreach ($stmt->fetchAll() as $row) {
+            $stats[$row['tipo']] = (int) $row['total'];
         }
 
         return $stats;

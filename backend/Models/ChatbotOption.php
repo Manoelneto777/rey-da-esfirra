@@ -2,9 +2,17 @@
 /**
  * backend/Models/ChatbotOption.php
  * Model da tabela chatbot_options.
- * Base de conhecimento: palavras-chave -> respostas manuais.
+ *
+ * ┌─────────────────────────────────────────────────────────────┐
+ * │ O QUE MUDOU                                                  │
+ * │ Antes o Model usava as colunas keyword/response, mas o       │
+ * │ schema real é intencao/resposta/ativo. Corrigido aqui.       │
+ * │                                                              │
+ * │ Esta tabela é a "base de conhecimento" do fluxo MANUAL:      │
+ * │   intencao = palavra-chave normalizada (ex: 'cardapio')      │
+ * │   resposta = texto que o bot devolve                         │
+ * └─────────────────────────────────────────────────────────────┘
  */
-
 
 namespace Models;
 
@@ -16,52 +24,65 @@ class ChatbotOption extends Model
     protected string $table = 'chatbot_options';
 
     /**
-     * Busca uma resposta por keyword usando correspondência parcial.
+     * Busca a resposta manual a partir da intenção já detectada.
      *
-     * Mudança:
-     * - Antes buscava apenas keyword exata.
-     * - Agora usa LIKE para encontrar a keyword dentro de frases maiores.
+     * Usamos igualdade exata (= :intencao) porque a intenção já chega
+     * "limpa" (ex: 'cardapio'), vinda de detectarIntencao(). Isso é mais
+     * previsível e mais rápido que um LIKE com %.
+     *
+     * @param  string $intencao  ex: 'cardapio', 'horarios'
+     * @return string|null       O texto da resposta, ou null se não houver
      */
-    public function buscarPorKeyword(string $keyword): ?array
+    public function buscarPorIntencao(string $intencao): ?string
     {
-        $keyword = mb_strtolower(trim($keyword), 'UTF-8');
+        $intencao = mb_strtolower(trim($intencao), 'UTF-8');
 
         $stmt = $this->db->prepare(
-            "SELECT *
+            "SELECT resposta
                FROM {$this->table}
-              WHERE LOWER(keyword) LIKE :keyword
+              WHERE LOWER(intencao) = :intencao
                 AND ativo = 1
               LIMIT 1"
         );
+        $stmt->execute([':intencao' => $intencao]);
 
-        $stmt->execute([
-            ':keyword' => '%' . $keyword . '%',
-        ]);
+        $resposta = $stmt->fetchColumn();
 
-        $result = $stmt->fetch(PDO::FETCH_ASSOC);
-
-        return $result ?: null;
+        // fetchColumn() devolve false quando não acha nada → normalizamos para null.
+        return $resposta !== false ? (string) $resposta : null;
     }
 
+    /**
+     * Lista todas as intenções ativas (útil para um futuro admin
+     * ou para alimentar a detecção dinamicamente).
+     *
+     * @return array
+     */
     public function listarAtivas(): array
     {
         $stmt = $this->db->prepare(
-            "SELECT *
+            "SELECT id, intencao, resposta, ativo
                FROM {$this->table}
               WHERE ativo = 1
-              ORDER BY keyword ASC"
+              ORDER BY intencao ASC"
         );
-
         $stmt->execute();
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function salvarOpcao(string $keyword, string $response): int
+    /**
+     * Cadastra ou atualiza uma resposta manual.
+     *
+     * @param  string $intencao
+     * @param  string $resposta
+     * @return int                ID inserido / linhas afetadas
+     */
+    public function salvarOpcao(string $intencao, string $resposta): int
     {
         return $this->save([
-            'keyword'  => mb_strtolower(trim($keyword), 'UTF-8'),
-            'response' => $response,
+            'intencao' => mb_strtolower(trim($intencao), 'UTF-8'),
+            'resposta' => $resposta,
             'ativo'    => 1,
         ]);
     }
