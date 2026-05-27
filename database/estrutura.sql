@@ -35,7 +35,15 @@ INSERT INTO produtos (nome, descricao, preco, categoria, imagem) VALUES
 ('Combo 10 un. Carne',     'Dez esfirras de carne com desconto especial da casa',                  65.00, 'Combos',       'combo.webp'),
 ('Combo 20 Mix',           'Vinte esfirras mistas a sua escolha melhor custo-beneficio',           120.00,'Combos',       'combo-mix.webp'),
 ('Refrigerante Lata',      'Coca-Cola Guarana ou Sprite bem gelados 350ml',                        5.00,  'Bebidas',      'refri.webp'),
-('Suco Natural 300ml',     'Laranja Limao ou Maracuja feito na hora',                              8.00,  'Bebidas',      'suco.webp');
+('Suco Natural 300ml',     'Laranja Limao ou Maracuja feito na hora',                              8.00,  'Bebidas',      'suco.webp'),
+('Esfirra de Chocolate',       'Chocolate com morango',               5.99,  'Doces', 'chocalatemorango.webp'),
+('Esfirra de Peito de Peru c/ Queijo',       'Peito de peru com Queijo',               5.49,  'Especiais', 'peruqueijo.webp'),
+('Esfirra de Carne Seca c/ cream cheese',       'Carne seca e cream cheese',               5.99,  'Especiais', 'carnesecacream.webp'),
+('Esfirra de Bacon',       'Bacon com queijo e catupiry',               5.99,  'Especiais', 'bacon.webp'),
+('Áçai',       'Áçai copo 300ml',               14.90,  'Doces', 'acai.webp'),
+('Água',       'Água Mineral sem gás 500ml',               4.00,  'Bebidas', 'agua.webp'),
+('Coca Cola',       'Coca Cola 1L',              10.00,  'Bebidas', 'cocacola.webp'),
+('Suco Del Valle - Uva',       'Del Valle - Uva 450ml',              7.00,  'Bebidas', 'valleuva.webp');
 
 -- ─── pedidos ──────────────────────────────────────────────
 CREATE TABLE IF NOT EXISTS pedidos (

@@ -13,11 +13,11 @@ class Config
     public const DB_NAME    = 'reydaesfirra_chatbot'; 
     public const DB_USER    = 'root';   
     public const DB_PASS    = '';       
-    public const DB_PORT    = '3307'; 
+    public const DB_PORT    = '3306'; 
     public const DB_CHARSET = 'utf8mb4';
 
     // OpenRouter (IA)
-    public const OPENROUTER_API_KEY  = ''; //adicione a chave aqui da OpenROuter AQUI
+    public const OPENROUTER_API_KEY  =''; //adicione AQUI a chave da OpenROuter.
     public const OPENROUTER_API_URL  = 'https://openrouter.ai/api/v1/chat/completions';
     public const OPENROUTER_MODEL = 'openrouter/free';
 
