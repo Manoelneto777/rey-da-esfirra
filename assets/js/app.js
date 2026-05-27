@@ -215,11 +215,12 @@ const CartUI = (() => {
     const badge = document.getElementById("cartBadge");
     if (badge) badge.textContent = unidades;
 
+    // 1. O Subtítulo do topo (Logo abaixo do título principal)
     const sub = document.getElementById("cartHeaderSub");
     if (sub) {
       sub.textContent = unidades
         ? `${unidades} ${unidades === 1 ? "item" : "itens"}`
-        : "Vazio";
+        : "Nenhuma esfiha por aqui ainda..."; 
     }
 
     const itemsEl = document.getElementById("cartItems");
@@ -228,6 +229,7 @@ const CartUI = (() => {
 
     itemsEl.innerHTML = "";
 
+    // 2. O miolo do carrinho quando está totalmente zerado
     if (!itens.length) {
       itemsEl.innerHTML = `
         <div class="cart-empty" style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 20px; text-align: center;">
@@ -236,9 +238,9 @@ const CartUI = (() => {
             <line x1="3" y1="6" x2="21" y2="6"></line>
             <path d="M16 10a4 4 0 0 1-8 0"></path>
           </svg>
-          <p style="color: var(--text-main); font-weight: 800; font-size: 1.1rem; margin-bottom: 4px;">Seu pedido está vazio</p>
-          <small style="color: var(--text-muted); font-size: 0.9rem;">Explore o nosso cardápio e monte o seu pedido.</small>
-          <button type="button" class="btn-voltar-compras" id="btnVoltarVazio" style="display:block; width:auto; margin-top: 20px; font-weight: 600; background:transparent; border:none; color: var(--text-muted); cursor:pointer;">← Continuar Comprando</button>
+          <p style="color: var(--text-main); font-weight: 800; font-size: 1.2rem; margin-bottom: 4px;">Bateu a fome? 🍕</p>
+          <small style="color: var(--text-muted); font-size: 0.95rem; margin-bottom: 16px;">Escolha suas esfirras favoritas para começarmos!</small>
+          <button type="button" class="btn-voltar-compras" id="btnVoltarVazio">&larr; Ver Cardápio</button>
         </div>`;
 
       document
@@ -273,24 +275,61 @@ const CartUI = (() => {
       itemsEl.appendChild(el);
     });
 
-    if (footerEl) {
+ if (footerEl) {
       footerEl.style.display = "block";
 
       const taxa = total >= 60 ? 0 : 5;
 
-      document.getElementById("subtotalValue").textContent =
-        `R$ ${total.toFixed(2).replace(".", ",")}`;
+      // Monta a estrutura em linhas organizadas usando flexbox inline
+      footerEl.innerHTML = `
+        <div class="cart-resumo-container" style="padding: 10px 0; border-bottom: 1px dashed #e5e5e5; margin-bottom: 15px;">
+          
+          <div class="cart-frete-alerta" style="font-size: 0.85rem; color: #666; text-align: left; margin-bottom: 12px; font-style: italic;">
+            ${total >= 60 ? '🎉 Parabéns! Você ganhou <strong>Frete Grátis</strong>!' : '💡 <em>Frete grátis em pedidos acima de R$ 60!</em>'}
+          </div>
 
-      document.getElementById("entregaValue").innerHTML =
-        taxa === 0
-          ? '<span style="color:var(--neon);font-weight:700">Grátis 🎉</span>'
-          : `R$ ${taxa.toFixed(2).replace(".", ",")}`;
+          <div class="resumo-item-linha" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;">
+            <span style="color: #555;">Subtotal</span>
+            <strong style="color: #000; font-weight: 700;">R$ ${total.toFixed(2).replace(".", ",")}</strong>
+          </div>
+          
+          <div class="resumo-item-linha" style="display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem;">
+            <span style="color: #555;">Taxa de Entrega</span>
+            <span id="entregaValue">
+              ${taxa === 0 
+                ? '<strong style="color: var(--neon, #28a745); font-weight: 800 !important;">Grátis 🎉</strong>' 
+                : `<strong>R$ ${taxa.toFixed(2).replace(".", ",")}</strong>`}
+            </span>
+          </div>
 
-      document.getElementById("totalValue").textContent =
-        `R$ ${(total + taxa).toFixed(2).replace(".", ",")}`;
+        </div>
+
+        <div class="cart-total-row" style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; margin-bottom: 15px;">
+          <span style="font-weight: 800; font-size: 1.1rem; color: var(--text-main, #000);">Total</span>
+          <span id="totalValue" style="font-weight: 900; font-size: 1.4rem; color: #e4002b;">R$ ${(total + taxa).toFixed(2).replace(".", ",")}</span>
+        </div>
+
+        <button class="btn-finalizar" id="btnFinalizarPedido" style="display: block; width: 100%; padding: 14px; background: #e4002b; color: #fff; border: none; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; margin-bottom: 12px;">
+          FINALIZAR PEDIDO &rarr;
+        </button>
+
+        <button type="button" class="btn-voltar-compras" id="btnVoltarCompras" style="display: block; width: 100%; text-align: center;">
+          &larr; Continuar Comprando
+        </button>
+      `;
+
+      // Garante que as ações dos botões recriados continuem funcionando
+      document.getElementById("btnVoltarCompras")?.addEventListener("click", () => CartUI.fechar());
+      
+      document.getElementById("btnFinalizarPedido")?.addEventListener("click", () => {
+         if(typeof Pedido !== 'undefined' && Pedido.abrirModal) {
+             Pedido.abrirModal();
+         }
+      });
     }
   }
 
+  // ── O fechamento correto e o retorno do módulo ──
   return { init, abrir, fechar };
 })();
 
