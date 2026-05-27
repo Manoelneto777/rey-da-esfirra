@@ -27,7 +27,7 @@ INSERT INTO produtos (nome, descricao, preco, categoria, imagem) VALUES
 ('Esfirra de Frango',      'Frango desfiado com catupiry cremoso e ervas especiais',               7.50,  'Tradicionais', 'frango.webp'),
 ('Esfirra de Queijo',      'Mussarela derretida com oregano classica e irresistivel',              6.50,  'Tradicionais', 'queijo.webp'),
 ('Esfirra de Calabresa',   'Calabresa artesanal com cebola caramelizada e pimentao',               8.00,  'Tradicionais', 'calabresa.webp'),
-('Esfirra de Palmito',     'Palmito pupunha cremoso com temperos especiais da casa',               8.50,  'Especiais',    'palmito..webp'),
+('Esfirra de Palmito',     'Palmito pupunha cremoso com temperos especiais da casa',               8.50,  'Especiais',    'palmito.webp'),
 ('Esfirra de Atum',        'Atum especial com azeitona preta e cebola roxa',                       9.00,  'Especiais',    'atum.webp'),
 ('Esfirra de Camarao',     'Camarao refogado no alho e azeite com pimentao vermelho',              12.00, 'Premium',      'camarao.webp'),
 ('Esfirra Doce de Banana', 'Banana caramelizada com canela e leite condensado',                    7.00,  'Doces',        'banana.webp'),

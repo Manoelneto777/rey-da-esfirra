@@ -177,17 +177,30 @@ const Cardapio = (() => {
 // ── Sidebar do carrinho ─────────────────────────
 const CartUI = (() => {
   function init() {
-    document.getElementById("cartToggle")?.addEventListener("click", abrir);
-    document.getElementById("cartClose")?.addEventListener("click", fechar);
-    document.getElementById("cartOverlay")?.addEventListener("click", fechar);
-    window.addEventListener("cart:update", (e) => _renderizar(e.detail));
+  document.getElementById("cartToggle")?.addEventListener("click", abrir);
+  document.getElementById("cartClose")?.addEventListener("click", fechar);
+  document.getElementById("cartOverlay")?.addEventListener("click", fechar);
+  window.addEventListener("cart:update", (e) => _renderizar(e.detail));
 
-    // Delegação: um único listener trata todos os botões dos itens,
-    // mesmo os que ainda nem foram criados. Substitui os onclick inline.
-    document
-      .getElementById("cartItems")
-      ?.addEventListener("click", _onItemClick);
-  }
+  document
+    .getElementById("cartItems")
+    ?.addEventListener("click", _onItemClick);
+
+  document.getElementById("cartFooter")?.addEventListener("click", (e) => {
+    const btnFinalizar = e.target.closest("#btnFinalizarPedido, #abrirModal");
+    if (btnFinalizar) {
+      e.preventDefault();
+      Pedido.abrirModal();
+      return;
+    }
+
+    const btnVoltar = e.target.closest("#btnVoltarCompras");
+    if (btnVoltar) {
+      e.preventDefault();
+      fechar();
+    }
+  });
+}
 
   // Lê data-acao / data-id do botão clicado e chama o Cart.
   function _onItemClick(e) {
@@ -319,13 +332,6 @@ const CartUI = (() => {
       `;
 
       // Garante que as ações dos botões recriados continuem funcionando
-      document.getElementById("btnVoltarCompras")?.addEventListener("click", () => CartUI.fechar());
-      
-      document.getElementById("btnFinalizarPedido")?.addEventListener("click", () => {
-         if(typeof Pedido !== 'undefined' && Pedido.abrirModal) {
-             Pedido.abrirModal();
-         }
-      });
     }
   }
 

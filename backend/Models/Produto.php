@@ -33,7 +33,18 @@ class Produto extends Model
             $stmt = $this->db->prepare(
                 "SELECT * FROM {$this->table}
                   WHERE disponivel = 1
-                  ORDER BY categoria, nome ASC"
+                  ORDER BY 
+                  CASE categoria
+                  WHEN 'Tradicionais' THEN 1
+                  WHEN 'Especiais' THEN 2
+                  WHEN 'Premium' THEN 3
+                  WHEN 'Doces' THEN 4
+                  WHEN 'Combos' THEN 5
+                  WHEN 'Combos da Galera' THEN 5
+                  WHEN 'Bebidas' THEN 6
+                  ELSE 99
+                END,
+                nome ASC"
             );
             $stmt->execute();
         }

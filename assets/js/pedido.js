@@ -187,7 +187,7 @@ const Pedido = (() => {
       .join("\n");
 
     const msg = [
-      "🥙 *NOVO PEDIDO — Rei da Esfirra*",
+      "🥙 *NOVO PEDIDO — Rey da Esfirra*",
       "",
       `👤 *Cliente:* ${nome}`,
       `📞 *Telefone:* ${telefone}`,
@@ -240,5 +240,9 @@ const Pedido = (() => {
     btn.textContent = loading ? "Enviando..." : "🚀 Confirmar Pedido";
   }
 
-  return { init };
-})();
+  return {
+    init,
+    abrirModal: _abrirModal,
+    fecharModal: _fecharModal,
+  };
+})(); 
