@@ -67,7 +67,7 @@ const Reibot = (() => {
         () =>
           _renderBotMsg({
             tipo: "bot",
-            texto: "Olá! Bem-vindo ao *Rei da Esfirra*! Como posso te ajudar?",
+            texto: "Olá! Bem-vindo ao *Rey da Esfirra*! Como posso te ajudar?",
             botoes: ["Cardápio", "Horários", "Localização", "Preços", "Delivery"],
           }),
         350,

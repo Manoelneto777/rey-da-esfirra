@@ -1454,7 +1454,7 @@ a.whatsapp-float:hover {
 
 .btn-voltar-compras:hover {
   background-color: #f5f5f5; /* Fundo cinza bem clarinho no hover */
-  border-color: #bdbdbd; /* Borda escurece um pouco no hover */
+  border-color: #000000; /* Borda escurece um pouco no hover */
   transform: translateY(-2px); /* Leve subida igual aos outros botões */
 }
 
@@ -1807,4 +1807,19 @@ a.whatsapp-float:hover {
     transition-duration: 0.001ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/* Melhora o espaçamento e o visual do rodapé do carrinho */
+#cartFooter p, .cart-total {
+  display: flex;
+  justify-content: space-between; /* Empurra o nome para a esquerda e o valor para a direita */
+  align-items: center;
+  margin-bottom: 10px;
+  font-size: 0.95rem;
+}
+
+/* Destaca os valores renderizados pelo JS */
+#subtotalValue, #entregaValue {
+  font-weight: 700;
+  color: var(--text-main);
 }
