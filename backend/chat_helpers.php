@@ -13,7 +13,6 @@
  */
 
 use Core\Config;
-
 // ─────────────────────────────────────────────────────────────
 // AUTOLOAD SIMPLES (sem Composer)
 // Converte "Core\Config" em "backend/Core/Config.php" e carrega.
@@ -66,14 +65,14 @@ function detectarIntencao(string $mensagemNorm): ?string
 function respostaManualFallback(string $intencao): ?string
 {
     switch ($intencao) {
-        case 'cardapio':
+     case 'cardapio':
             return "👑 *Nosso Cardápio*\n\n" .
-                   "🍕 *Tradicionais:* a partir de R$ 6,50 (Carne, Frango, Queijo, Calabresa)\n" .
-                   "✨ *Especiais:* a partir de R$ 8,50 (Palmito, Atum)\n" .
+                   "🍕 *Tradicionais e Especiais:* a partir de R$ 5,49 (Carne, Frango, Queijo, Bacon, etc)\n" .
                    "🍤 *Premium:* R$ 12,00 (Camarão)\n" .
-                   "🍫 *Doces:* a partir de R$ 7,00 (Banana, Chocolate)\n" .
-                   "🍟 *Combos:* 10 un. R$ 65,00 · 20 un. Mix R$ 120,00\n\n" .
-                   "Qual sabor vai matar sua fome hoje?";
+                   "🍫 *Doces e Açaí:* a partir de R$ 5,99 (Chocolate, Banana, Açaí 300ml)\n" .
+                   "🍟 *Combos:* 10 un. R$ 65,00 · 20 un. Mix R$ 120,00\n" .
+                   "🥤 *Bebidas:* Sucos, Refrigerantes e Água (a partir de R$ 4,00)\n\n" .
+                   "Navegue pela tela para ver as fotos deliciosas ou me peça uma sugestão! Qual vai ser o pedido de hoje?";
 
         case 'horarios':
             return "⏰ *Horários*\n\n" .
