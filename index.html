@@ -9,7 +9,9 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,600;0,800;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/css/style.css?v=11" />
+  <link rel="stylesheet" href="assets/css/style.css?v=13" />
+  
+
   <!-- Font Awesome removido: os ícones sociais agora são SVG inline (mais leve). -->
 </head>
 <body>
@@ -53,90 +55,65 @@
       <p class="hero-sub">Massa artesanal, forno a lenha e entrega rápida em Capoeiruçu.</p>
     </div>
 
-    <div class="categorias-sobre-video" id="categoriasScroll">
-      <div class="categorias-inner" id="categoriasInner">
-        <button class="cat-pill active" data-cat="Todos">Cardápio Completo</button>
-        <button class="cat-pill" data-cat="Tradicionais">Tradicionais</button>
-        <button class="cat-pill" data-cat="Especiais">Especiais</button>
-        <button class="cat-pill" data-cat="Premium">Premium</button>
-        <button class="cat-pill" data-cat="Doces">Doces</button>
-        <button class="cat-pill" data-cat="Combos">Combos da Galera</button>
-        <button class="cat-pill" data-cat="Bebidas">Bebidas</button>
-      </div>
-    </div>
+  <!-- A SEÇÃO DO VÍDEO TERMINA AQUI, AGORA SEM OS BOTÕES -->
   </section>
 
+  <!-- SEÇÃO DO CARDÁPIO (AGORA COM OS BOTÕES INTEGRADOS) -->
   <section class="cardapio" id="cardapio">
     <div class="container">
+      
+      <!-- Título do Cardápio -->
       <div class="cardapio-header">
-        <div>
-          <div class="section-eyebrow">Direto do Forno</div>
-          <h2 class="section-title">Nosso <span class="gold" style="color: var(--red-brand);">Cardápio</span></h2>
-          <div class="cardapio-count" id="cardapioCount">Carregando opções...</div>
+        <div class="section-eyebrow">Direto do Forno</div>
+        <h2 class="section-title">Nosso <span class="gold" style="color: var(--red-brand);">Cardápio</span></h2>
+        <div class="cardapio-count" id="cardapioCount">Carregando opções...</div>
+      </div>
+
+      <!-- BOTÕES AQUI: Logo abaixo do título e antes das esfirras -->
+      <div class="categorias-filtros" id="categoriasScroll">
+        <div class="categorias-inner" id="categoriasInner">
+          <button class="cat-pill active" data-cat="Todos">Cardápio Completo</button>
+          <button class="cat-pill" data-cat="Tradicionais">Tradicionais</button>
+          <button class="cat-pill" data-cat="Especiais">Especiais</button>
+          <button class="cat-pill" data-cat="Premium">Premium</button>
+          <button class="cat-pill" data-cat="Doces">Doces</button>
+          <button class="cat-pill" data-cat="Combos">Combos da Galera</button>
+          <button class="cat-pill" data-cat="Bebidas">Bebidas</button>
         </div>
       </div>
+
+      <!-- Vitrine de Produtos -->
       <div class="produtos-grid" id="produtosGrid">
         <div class="loading-state">
           <div class="spinner"></div>
           <span>Preparando o cardápio...</span>
         </div>
       </div>
+      
     </div>
   </section>
 
+  <!-- O BANNER VERMELHO CONTINUA INTACTO DAQUI PRA BAIXO -->
   <section class="cta-banner">
-    <div class="cta-banner-bg"></div>
     <div class="container">
       <div class="cta-inner">
         <div class="cta-text">
-          <h2>Bateu a fome? Não perca tempo!</h2>
-          <p>Pedido mínimo de R$ 25,00 · Entregamos rápido em toda região de Cachoeira e Capoeiruçu.</p>
+          <h2>O verdadeiro sabor de Capoeiruçu, direto para a sua mesa.</h2>
+          <p>Massa artesanal, ingredientes selecionados e o inconfundível toque do forno a lenha. Entregamos o seu pedido rápido e quentinho, com opções de pagamento fáceis via PIX ou cartão na entrega.</p>
         </div>
-        <div class="cta-chips">
-          <div class="cta-chip">🛵 Delivery 30–50 min</div>
-          <div class="cta-chip">💳 Aceitamos PIX e Cartões</div>
-        </div>
-        <a href="#cardapio" class="btn btn-primary" style="background: #ffffff; color: var(--red-brand);">Fazer Pedido Agora</a>
+        <a href="#cardapio" class="btn btn-cta-white">Fazer Pedido Agora</a>
       </div>
     </div>
   </section>
 
-  <section class="sobre" id="sobre">
+<section class="reviews">
     <div class="container">
-      <div class="sobre-layout">
-        <div class="sobre-text">
-          <div class="section-eyebrow">A Nossa História</div>
-          <h2 class="section-title">Feito com paixão,<br>servido com orgulho.</h2>
-          <div class="sobre-divider"></div>
-          <p>Desde 2024, o Rey da Esfirra é o ponto de encontro e a salvação das noites em Capoeiruçu. Começamos pequenos, mas com uma receita de massa que conquistou todo mundo pela leveza e sabor.</p>
-          <p>Hoje, atendemos milhares de clientes toda semana, sempre mantendo a pegada artesanal: ingredientes frescos comprados no dia e forno a lenha estralando.</p>
-          <div class="feat-grid">
-            <div class="feat-item">
-              <div class="feat-copy"><strong>Ingredientes Frescos</strong><small>Qualidade lá em cima, com insumos comprados diariamente.</small></div>
-            </div>
-            <div class="feat-item">
-              <div class="feat-copy"><strong>Forno a Lenha</strong><small>Aquele sabor defumado e inconfundível que só a gente tem.</small></div>
-            </div>
-            <div class="feat-item">
-              <div class="feat-copy"><strong>Delivery a Jato</strong><small>Chega quentinho na sua porta. Rapidez é nosso forte.</small></div>
-            </div>
-          </div>
-        </div>
-        <div class="sobre-vitrine">
-          <div class="sobre-center" style="font-family: var(--font-display); font-size: 3.5rem; text-align: center; line-height: 1.2;">
-            <img src="assets/images/logocenter.png" alt="Rey da Esfirra" style="max-width: 100%; height: auto;">
-          </div>
-        </div>
+      
+      <div class="header-moderno header-centro" style="margin-top: 60px;">
+        <span class="eyebrow">A Galera Curte</span>
+        <h2 class="title">O que dizem <strong>sobre nós</strong></h2>
       </div>
-    </div>
-  </section>
 
-  <section class="reviews">
-    <div class="container">
-      <div class="section-center">
-        <div class="section-eyebrow">A Galera Curte</div>
-        <h2 class="section-title">O que dizem <span class="gold" style="color: var(--red-brand);">sobre nós</span></h2>
-      </div>
       <div class="reviews-grid">
         <div class="review-card">
           <div class="review-stars">★★★★★</div>
@@ -160,16 +137,15 @@
           </div>
         </div>
       </div>
-    </div>
-  </section>
+      
+    </div> </section>
 
-  <section class="contato" id="contato">
+ <section class="contato" id="contato">
     <div class="container">
-      <div class="section-center">
-        <div class="section-eyebrow">Onde Estamos</div>
-        <h2 class="section-title">
-          Venha nos <span class="gold" style="color: var(--red-brand);">visitar</span>
-        </h2>
+      
+      <div class="header-moderno">
+        <span class="eyebrow">Nossa Localização</span>
+        <h2 class="title">Venha nos <strong>visitar</strong></h2>
       </div>
 
       <div class="contato-layout">
@@ -199,8 +175,8 @@
         <div class="mapa-card">
           <iframe
             src="https://www.google.com/maps/embed?pb=!1m14!1m12!1m3!1d495.6516239501447!2d-38.97243216896671!3d-12.56744173763899!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!5e1!3m2!1spt-BR!2sbr!4v1777948763879!5m2!1spt-BR!2sbr"
-            width="100"
-            height="100"
+            width="100%"
+            height="100%"
             style="border:0; border-radius: 12px;"
             title="Mapa da localização do Rey da Esfirra"
             allowfullscreen=""
@@ -209,8 +185,8 @@
           </iframe>
         </div>
       </div>
-    </div>
-  </section>
+      
+    </div> </section>
 
 </main>
 
@@ -378,6 +354,16 @@
     }
   });
 </script>
+
+<div id="cookieBanner" class="cookie-banner">
+    <div class="cookie-content">
+        <p>🍪 <strong>Privacidade:</strong> Usamos cookies essenciais para o funcionamento do carrinho e histórico da IA. Ao continuar, você concorda com nossa política.</p>
+        <div class="cookie-actions">
+            <button id="recusarCookies" class="btn-cookie-outline">Recusar</button>
+            <button id="aceitarCookies" class="btn-cookie">Aceitar</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
