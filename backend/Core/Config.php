@@ -13,7 +13,7 @@ class Config
     public const DB_NAME    = 'reydaesfirra_chatbot'; 
     public const DB_USER    = 'root';   
     public const DB_PASS    = '';       
-    public const DB_PORT    = ''; // adcione a porta do seu MySQL se for diferente da padrão (3306)
+    public const DB_PORT    = '3306'; 
     public const DB_CHARSET = 'utf8mb4';
 
     // OpenRouter (IA)
