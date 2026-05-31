@@ -1,6 +1,6 @@
 -- ═══════════════════════════════════════════════════════════
 -- REI DA ESFIRRA — database/estrutura.sql
--- Importar no phpMyAdmin (cria o banco do zero, já pronto).
+-- Importar no phpMyAdmin.
 -- ═══════════════════════════════════════════════════════════
 
 CREATE DATABASE IF NOT EXISTS reydaesfirra_chatbot

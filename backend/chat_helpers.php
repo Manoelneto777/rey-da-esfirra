@@ -153,7 +153,7 @@ function respostaPadraoTexto(): string
 }
 
 // ─────────────────────────────────────────────────────────────
-// 4. CHAMAR OPENROUTER (IA) — VERSÃO CORRIGIDA
+// 4. CHAMAR OPENROUTER (IA)
 //
 // A versão antiga estava quebrada: nunca executava curl_exec() e
 // usava variáveis ($response, $error, $httpCode) que não existiam,
