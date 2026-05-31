@@ -288,7 +288,7 @@ const CartUI = (() => {
       itemsEl.appendChild(el);
     });
 
- if (footerEl) {
+if (footerEl) {
       footerEl.style.display = "block";
 
       const taxa = total >= 60 ? 0 : 5;
@@ -331,7 +331,20 @@ const CartUI = (() => {
         </button>
       `;
 
-      // Garante que as ações dos botões recriados continuem funcionando
+      // ── RE-VINCULAÇÃO DOS EVENTOS (Adicione exatamente estas linhas abaixo) ──
+      
+      // 1. Faz o botão Continuar Comprando voltar a fechar a barra lateral
+      document.getElementById("btnVoltarCompras")?.addEventListener("click", () => CartUI.fechar());
+      
+      // 2. Aciona o motor do arquivo pedido.js para abrir o modal de finalização na tela
+      document.getElementById("btnFinalizarPedido")?.addEventListener("click", () => {
+         if (typeof Pedido !== 'undefined' && Pedido.abrirModal) {
+             Pedido.abrirModal();
+         } else {
+             // Caso o script use outra função de inicialização ou abertura, chamamos o Init
+             Pedido.init();
+         }
+      });
     }
   }
 
@@ -374,10 +387,60 @@ const Navbar = (() => {
   return { init };
 })();
 
+// ── Módulo LGPD (Cookies) ────────────────────────
+const LGPD = (() => {
+  function init() {
+    const banner = document.getElementById("cookieBanner");
+    const btnAceitar = document.getElementById("aceitarCookies");
+    const btnRecusar = document.getElementById("recusarCookies");
+    const chatLabel = document.querySelector(".chat-label");
+    const chatWidget = document.getElementById("chatbotWidget");
+
+    if (!banner) return;
+
+    // 1. Verifica se já respondeu antes
+    const consentimento = localStorage.getItem("cookiesAceitos");
+    
+    if (consentimento) {
+        // Se já respondeu, esconde o banner e libera o chatbot
+        banner.style.display = "none";
+        if (chatLabel) chatLabel.style.display = "block";
+        if (chatWidget) chatWidget.classList.add("show");
+        return;
+    }
+
+    // 2. Se nunca respondeu, garante que o banner apareça e esconde o chat
+    banner.style.display = "block";
+    if (chatLabel) chatLabel.style.display = "none";
+
+    // 3. Função única para processar o clique
+    function processarEscolha(escolha) {
+        localStorage.setItem("cookiesAceitos", escolha);
+        banner.style.display = "none";
+        
+        // Libera a interface do chat após a escolha
+        if (chatLabel) chatLabel.style.display = "block";
+        if (chatWidget) chatWidget.classList.add("show");
+
+        // Dá um feedback visual se o usuário recusou
+        if (escolha === "false") {
+            UI.toast("🛡️", "Preferências de privacidade atualizadas.", "info");
+        }
+    }
+
+    // 4. Conecta os botões à função
+    btnAceitar?.addEventListener("click", () => processarEscolha("true"));
+    btnRecusar?.addEventListener("click", () => processarEscolha("false"));
+  }
+
+  return { init };
+})();
+
 // ── Bootstrap ────────────────────────────────────
 document.addEventListener("DOMContentLoaded", () => {
   Navbar.init();
   CartUI.init();
+  LGPD.init();
 
   Pedido.init();
   Cardapio.initFiltros();
@@ -391,6 +454,18 @@ document.addEventListener("DOMContentLoaded", () => {
   document
     .querySelector(".mapa-card")
     ?.addEventListener("click", () =>
-      window.open("https://www.google.com/maps", "_blank", "noopener"),
-    );
+      window.open("https://www.google.com/maps", "_blank", "noopener")
+    ); 
+
+  // ── Motor da Navbar Mutante ──
+  const navbar = document.getElementById("navbar");
+  if (navbar) {
+      window.addEventListener("scroll", () => {
+          if (window.scrollY > 50) {
+              navbar.classList.add("scrolled");
+          } else {
+              navbar.classList.remove("scrolled");
+          }
+      });
+  }
 });

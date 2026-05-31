@@ -182,34 +182,51 @@ button {
 .btn-add-produto:active {
   transform: scale(0.95);
 }
-
 /* ══════════════════════════════════════
-   NAVBAR (Vermelho Forte)
+   NAVBAR (Mutante Premium - Nas Pontas)
 ══════════════════════════════════════ */
-/* ─── NAVBAR TRANSPARENTE SOBRE O VÍDEO ─── */
+/* Estado 1: Topo Absoluto (Transparente e Estendida nas pontas) */
 .navbar {
-  background: var(--red-brand) !important; /* Força o vermelho da marca */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1) !important;
-  transition: all 0.3s ease;
   position: fixed;
   top: 0;
   left: 0;
-  right: 0;
+  width: 100%;
   z-index: 1000;
-  height: 72px;
-  display: flex;
-  align-items: center;
+  padding: 15px 0; /* Removemos o padding daqui para controlar por dentro */
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
+  pointer-events: none;
 }
 
 .nav-inner {
-  max-width: 1220px;
+  pointer-events: auto;
+  max-width: 100%; /* O SEGREDO: Estica a barra inteira para as pontas */
   margin: 0 auto;
-  padding: 0 28px;
-  height: 100%;
+  height: 65px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 32px;
+  padding: 0 30px; /* Espaço de respiro para o logo e carrinho não colarem no canto do monitor */
+  background: transparent;
+  border: 2px solid transparent;
+  border-radius: 0;
+  transition: all 0.4s cubic-bezier(0.25, 1, 0.5, 1);
 }
+
+/* Estado 2: Ao Rolar a Página (Pílula Flutuante de ponta a ponta) */
+.navbar.scrolled {
+  padding: 15px 20px 0; /* Descola levemente do teto e da tela */
+}
+
+.navbar.scrolled .nav-inner {
+  background: var(--red-brand);
+  border: 2px solid #ffffff;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+  border-radius: 9999px; /* Vira pílula */
+  padding: 8px 40px; /* Mantém os itens esticados nas pontas dentro da pílula */
+}
+
+/* Mantemos o resto do seu código intacto daqui para baixo: */
 .logo {
   display: flex;
   align-items: center;
@@ -236,7 +253,6 @@ button {
 .logo-text span {
   color: var(--gold);
 }
-
 .nav-links {
   display: flex;
   align-items: center;
@@ -245,7 +261,7 @@ button {
 }
 .nav-link {
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 9999px; /* Arredonda os botões do menu também */
   font-size: 0.95rem;
   font-weight: 600;
   color: #ffffff;
@@ -258,7 +274,6 @@ button {
 .nav-admin-link {
   color: var(--gold) !important;
 }
-
 .nav-right {
   margin-left: auto;
   display: flex;
@@ -295,6 +310,7 @@ button {
   color: #ffffff;
   padding: 6px;
 }
+
 
 /* ══════════════════════════════════════
    HERO (Fundo Branco/Cinza Claro)
@@ -488,6 +504,9 @@ button {
 .categorias-inner::-webkit-scrollbar {
   display: none;
 }
+/* ══════════════════════════════════════
+   FILTROS DE CATEGORIA (Amarelo Interativo)
+══════════════════════════════════════ */
 .cat-pill {
   padding: 10px 24px;
   border-radius: 100px;
@@ -497,56 +516,132 @@ button {
   background: var(--ink-1);
   border: 1px solid var(--border-soft);
   white-space: nowrap;
-  transition: 0.2s;
+  /* Substituímos o 0.2s seco por uma curva de animação premium */
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+  cursor: pointer;
 }
-.cat-pill:hover {
-  background: var(--border-soft);
+
+/* O Efeito no Hover: Pula, fica amarelo e brilha (apenas nos que não estão ativos) */
+.cat-pill:hover:not(.active) {
+  background: #ffb800; /* Amarelo de ação */
+  color: #000000; /* Letra preta para dar leitura forte em cima do amarelo */
+  border-color: #ffb800;
+  transform: translateY(-4px); /* Dá o "pulinho" pra cima */
+  box-shadow: 0 8px 20px rgba(255, 184, 0, 0.3); /* Brilho suave amarelo */
 }
+
+/* Efeito ao clicar: o botão "afunda" na tela */
+.cat-pill:active:not(.active) {
+  transform: translateY(0);
+  box-shadow: 0 4px 10px rgba(255, 184, 0, 0.15);
+}
+
+/* O botão selecionado continua vermelho e imponente */
 .cat-pill.active {
   background: var(--red-brand);
   color: #ffffff;
   border-color: var(--red-brand);
+  box-shadow: 0 6px 15px rgba(228, 0, 43, 0.2); /* Adicionei uma sombra sutil ao ativo também */
+}
+/* ══════════════════════════════════════
+   CARDÁPIO (Grelha Premium & Editorial)
+══════════════════════════════════════ */
+.cardapio {
+    margin-top: -50px; /* Isso faz a seção "subir" 50px sobre o vídeo */
+    position: relative;
+    z-index: 5; /* Garante que o cardápio fique em cima do vídeo */
+    border-radius: 30px 30px 0 0; /* Arredonda o topo para dar charme */
 }
 
 /* ══════════════════════════════════════
-   CARDÁPIO (Grelha Branca)
+   TÍTULO CARDÁPIO (Premium Ribbon Horizontal)
 ══════════════════════════════════════ */
-.cardapio {
-  padding: 80px 0 100px;
-  background: var(--ink-1);
-}
 .cardapio-header {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  margin-bottom: 40px;
-}
-.cardapio-count {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-  font-weight: 600;
-  margin-top: 8px;
-  display: block;
+    width: 100vw !important;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
+    
+    /* Fundo premium: um gradiente super suave do vermelho clarinho para o branco */
+    background: linear-gradient(90deg, #fff0f2 0%, #ffffff 100%) !important;
+    
+    /* Faixa mais fina na altura, espaçosa nas laterais */
+    padding: 20px 8% !important; 
+    
+    border: none !important;
+    border-top: 1px solid rgba(228, 0, 43, 0.1) !important;
+    border-bottom: 1px solid rgba(228, 0, 43, 0.1) !important;
+    border-left: 8px solid var(--red-brand) !important; /* Destaque lateral colado na tela */
+    
+    /* O SEGREDO: Elementos lado a lado, formando uma barra de ferramentas */
+    display: flex !important;
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 20px !important;
+    flex-wrap: wrap; /* Garante que não quebre em telas pequenas */
+    
+    margin-bottom: 50px !important;
 }
 
+/* A pílula vira um "botão" lateral de status */
+.cardapio-header .section-eyebrow {
+    background: var(--red-brand) !important;
+    color: #ffffff !important;
+    padding: 10px 24px !important;
+    border-radius: 100px !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    text-transform: uppercase !important;
+    letter-spacing: 1.5px !important;
+    margin: 0 !important; /* Removemos a margem para ficar alinhado */
+    box-shadow: 0 6px 15px rgba(228, 0, 43, 0.2) !important; /* Sombra vermelha de destaque */
+}
+
+/* O título acompanha a pílula na mesma linha */
+.cardapio-header .section-title {
+    margin: 0 !important;
+    font-size: 2.4rem !important;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+/* Deixamos a contagem de itens mais estilizada ao lado do título */
+.cardapio-count {
+    margin: 0 !important;
+    font-size: 0.9rem !important;
+    color: var(--text-main) !important;
+    background: rgba(0, 0, 0, 0.05) !important;
+    padding: 6px 14px !important;
+    border-radius: 100px !important;
+    font-weight: 700 !important;
+}
+
+/* ── 2. Grid e Cards dos Produtos ── */
 .produtos-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
   gap: 24px;
 }
+
+/* Limite claro para o cartão e destaque no Hover */
 .produto-card {
-  background: #ffffff;
-  border: 1px solid var(--border-soft);
-  border-radius: 12px;
-  overflow: hidden;
-  transition: 0.3s;
-  box-shadow: var(--shadow-sm);
+    background: #ffffff;
+    border: 1px solid #000000 !important; /* Borda cinza fina, mas bem definida contra o fundo */
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02); /* Sombra quase imperceptível, o foco é a borda */
+    display: flex;
+    flex-direction: column;
 }
+
 .produto-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-md);
-  border-color: var(--red-brand);
+    transform: translateY(-6px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1); /* A sombra aumenta para dar a sensação de elevação */
+    border-color: var(--red-brand) !important; /* A borda acende no vermelho da marca indicando o clique */
 }
+
 .produto-img-wrap {
   height: 200px;
   background: var(--ink-2);
@@ -556,40 +651,52 @@ button {
   align-items: center;
   justify-content: center;
 }
+
 .produto-img-wrap img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transition: 0.4s;
+  transition: transform 0.5s ease;
 }
+
 .produto-card:hover .produto-img-wrap img {
-  transform: scale(1.05);
+  transform: scale(1.08); /* Zoom mais imersivo no hover */
 }
+
 .produto-body {
-  padding: 20px;
+  padding: 24px; /* Mais área de respiro (whitespace) */
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1; /* Preenche a altura do card */
 }
+
 .produto-nome {
   font-size: 1.15rem;
   font-weight: 800;
   color: var(--text-main);
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
+
 .produto-desc {
   font-size: 0.9rem;
   color: var(--text-muted);
   line-height: 1.5;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  flex-grow: 1; /* Empurra o preço/botão sempre para o final da caixa */
 }
+
 .produto-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: auto; /* Trava o footer na base do card */
 }
+
 .produto-preco-overlay {
   font-family: var(--font-display);
   font-size: 1.4rem;
@@ -597,6 +704,7 @@ button {
   color: var(--red-brand);
 }
 
+/* ── 3. Estados de Carregamento ── */
 .spinner {
   width: 40px;
   height: 40px;
@@ -606,6 +714,7 @@ button {
   animation: spin 0.8s linear infinite;
   margin: 0 auto;
 }
+
 .loading-state {
   grid-column: 1/-1;
   text-align: center;
@@ -614,15 +723,15 @@ button {
 }
 
 /* ══════════════════════════════════════
-   BANNER CTA
+   CTA BANNER (Vermelho, Fluido e Sofisticado)
 ══════════════════════════════════════ */
 .cta-banner {
-  padding: 80px 0;
-  background: var(--red-brand);
-  color: #ffffff;
+  background: var(--red-brand); /* Voltando para a identidade do site */
+  padding: 90px 20px;
   text-align: center;
 }
-.cta-inner {
+
+.cta-banner .cta-inner {
   max-width: 800px;
   margin: 0 auto;
   display: flex;
@@ -630,35 +739,46 @@ button {
   align-items: center;
   gap: 24px;
 }
-.cta-text h2 {
-  font-family: var(--font-display);
-  font-size: clamp(2rem, 4vw, 3rem);
+
+/* Título de impacto, sem parecer bloco montado */
+.cta-banner h2 {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 3rem;
   font-weight: 800;
-  margin-bottom: 12px;
+  color: #ffffff;
+  line-height: 1.15;
+  letter-spacing: -1px;
+  margin: 0;
 }
-.cta-chips {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  justify-content: center;
-  margin-bottom: 16px;
+
+/* Texto corrido e harmônico, com transparência sutil para elegância */
+.cta-banner p {
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.15rem;
+  color: rgba(255, 255, 255, 0.9); 
+  font-weight: 400;
+  line-height: 1.6;
+  margin: 0 auto 10px;
+  max-width: 700px;
 }
-.cta-chip {
-  padding: 10px 20px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 100px;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-.cta-banner .btn-primary {
+
+/* Botão de destaque com alto contraste */
+.btn-cta-white {
   background: #ffffff;
   color: var(--red-brand);
-  font-size: 1rem;
-  padding: 16px 40px;
+  padding: 18px 45px;
+  font-family: 'Plus Jakarta Sans', sans-serif;
+  font-size: 1.05rem;
+  font-weight: 800;
+  border-radius: 100px;
+  text-decoration: none;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: inline-block;
 }
-.cta-banner .btn-primary:hover {
-  background: var(--gold);
-  color: var(--text-main);
+
+.btn-cta-white:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
 }
 
 /* ══════════════════════════════════════
@@ -768,53 +888,176 @@ button {
   background: #ffffff;
   border-top: 1px solid var(--border-soft);
 }
-.contato-layout {
-  display: grid;
-  grid-template-columns: 1fr 1.5fr;
-  gap: 40px;
-  margin-top: 40px;
-}
-.info-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-.info-item {
-  background: var(--ink-1);
-  padding: 24px;
-  border-radius: 12px;
-  border: 1px solid var(--border-soft);
-  box-shadow: var(--shadow-sm);
-}
-.info-copy strong {
-  display: block;
-  color: var(--red-brand);
-  font-size: 0.95rem;
-  text-transform: uppercase;
-  margin-bottom: 8px;
-}
-.info-copy p {
-  color: var(--text-muted);
-  font-size: 1rem;
-  line-height: 1.6;
-}
-.mapa-card {
-  height: 100%;
-  min-height: 350px;
-  background: var(--ink-1);
-  border-radius: 12px;
-  border: 1px solid var(--border-soft);
-  display: flex;
-  align-items: center;
-  justify-content: center;
+
+/* ══════════════════════════════════════
+   CABEÇALHO MODERNO (Para todas as seções)
+══════════════════════════════════════ */
+.header-moderno {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Crava tudo na esquerda */
+    text-align: left;
+    margin-bottom: 40px;
+    width: 100%;
 }
 
-/* Garante que o Iframe do Google Maps ocupe o espaço todo do card */
+/* ══════════════════════════════════════
+   VARIAÇÃO CENTRALIZADA (Para Depoimentos)
+══════════════════════════════════════ */
+.header-moderno.header-centro {
+    align-items: center !important;
+    text-align: center !important;
+}
+
+/* Centraliza a linha vermelha embaixo do texto */
+.header-moderno.header-centro .title::after {
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+}
+
+.header-moderno .eyebrow {
+    background: rgba(228, 0, 43, 0.1);
+    color: var(--red-brand);
+    padding: 8px 16px;
+    border-radius: 100px;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    margin-bottom: 15px;
+}
+
+.header-moderno .title {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: 2.8rem; /* Tamanho elegante */
+    font-weight: 800;
+    color: var(--text-main);
+    margin: 0;
+    position: relative;
+    padding-bottom: 20px; /* Espaço para a linha */
+    line-height: 1.1;
+    display: inline-block; /* Faz a caixa ter o tamanho exato do texto */
+}
+
+/* Deixa a palavra em destaque vermelha */
+.header-moderno .title strong {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--red-brand);
+    font-weight: 800;
+}
+
+/* A linha vermelha que agora vai ficar grudada certinha no texto */
+.header-moderno .title::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 80px;
+    height: 5px;
+    background: var(--red-brand);
+    border-radius: 10px;
+}
+
+/* ══════════════════════════════════════
+   CONTATO & MAPA (Premium Bento Box)
+══════════════════════════════════════ */
+.contato-layout {
+    display: grid;
+    grid-template-columns: 1fr 1.5fr;
+    gap: 30px;
+    background: #fafafa;
+    padding: 40px;
+    border-radius: 24px;
+    border: 1px solid #eeeeee;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+}
+
+.info-list {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ══════════════════════════════════════
+   CARTÕES DE INFO (Cores Fixas + Pulo)
+══════════════════════════════════════ */
+.info-item {
+    background: #ffffff !important;
+    padding: 24px 24px 24px 30px !important; /* Espaço para a linha lateral */
+    border-radius: 16px !important;
+    border: 1px solid rgba(228, 0, 43, 0.2) !important; /* Borda vermelha FIXA */
+    transition: transform 0.3s cubic-bezier(0.25, 1, 0.5, 1), box-shadow 0.3s ease !important;
+    position: relative;
+    overflow: hidden;
+}
+
+/* A linha lateral agora fica 100% VISÍVEL sempre (opacity 1) */
+.info-item::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 6px;
+    background: var(--red-brand) !important;
+    opacity: 1 !important; 
+}
+
+/* Animação: O cartão "levanta" (pula) ao passar o mouse */
+.info-item:hover {
+    transform: translateY(-5px) !important; 
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08) !important;
+}
+
+/* Tipografia */
+.info-copy strong {
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    color: var(--red-brand);
+    font-size: 0.8rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.info-copy p {
+    color: var(--text-main);
+    font-size: 1.05rem;
+    font-weight: 600;
+    margin: 0;
+}
+
+/* Destaque FIXO para o WhatsApp (Verde permanente) */
+.info-item:last-child {
+    border: 1px solid rgba(37, 211, 102, 0.4) !important;
+    cursor: pointer;
+}
+
+.info-item:last-child::before {
+    background: #25d366 !important;
+}
+
+.info-item:last-child strong {
+    color: #25d366 !important;
+}
+
+/* O Mapa */
+.mapa-card {
+    border-radius: 16px;
+    overflow: hidden;
+    border: 1px solid #f0f0f0;
+    height: 100%;
+    min-height: 350px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+}
+
 .mapa-card iframe {
-  width: 100%;
-  height: 100%;
-  min-height: 350px;
-  border-radius: 12px;
+    width: 100%;
+    height: 100%;
+    min-height: 350px;
+    border-radius: 16px;
 }
 
 /* ══════════════════════════════════════
@@ -895,11 +1138,12 @@ button {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 10000; /* Fica acima do chatbot */
+  z-index: 9999997; /* Agora sim, matematicamente acima do chat */
   opacity: 0;
   pointer-events: none;
   transition: 0.3s;
 }
+
 .cart-overlay.open {
   opacity: 1;
   pointer-events: all;
@@ -912,7 +1156,7 @@ button {
   max-width: 100vw;
   height: 100%;
   background: #ffffff;
-  z-index: 10001; /* Camada mais alta de todo o site */
+  z-index: 9999998; /* Nova camada mais alta de todo o site */
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
@@ -935,7 +1179,7 @@ button {
   font-weight: 800;
   color: var(--text-main);
 }
-.cart-close {
+.cart-close, .modal-close {
   width: 36px;
   height: 36px;
   background: #e0e0e0;
@@ -945,11 +1189,22 @@ button {
   justify-content: center;
   font-weight: 800;
   color: var(--text-main);
-  transition: 0.2s;
+  cursor: pointer;
+  border: none;
+  /* Transição premium para suavizar a cor, o tamanho e o giro ao mesmo tempo */
+  transition: all 0.3s cubic-bezier(0.25, 1, 0.5, 1);
 }
-.cart-close:hover {
+
+.cart-close:hover, .modal-close:hover {
   background: var(--red-brand);
   color: #ffffff;
+  /* O segredo da animação: gira 90 graus e dá um leve zoom */
+  transform: rotate(90deg) scale(1.1);
+}
+
+.cart-close:active, .modal-close:active {
+  /* Efeito de "afundar" ao clicar, mantendo o giro */
+  transform: rotate(90deg) scale(0.95);
 }
 .cart-items {
   flex: 1;
@@ -1054,7 +1309,7 @@ button {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.6);
-  z-index: 111000;
+  z-index: 9999999; /* Topo absoluto, acima de todos */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1150,42 +1405,76 @@ a.whatsapp-float:hover {
   transform: scale(1.1);
 }
 
+
+/* ══════════════════════════════════════
+   WIDGET DE CHAT (Prioridade Máxima)
+══════════════════════════════════════ */
 .chatbot-widget {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 950;
-  display: flex;
-  align-items: center;
+    position: fixed !important;
+    bottom: 24px !important;
+    right: 24px !important;
+    z-index: 999999 !important;
+    display: flex !important;
+    align-items: center !important;
+    pointer-events: none !important; /* MUDANÇA: O container deixa o clique passar */
 }
+
+/* Garante que APENAS o botão seja clicável */
 .chatbot-toggle {
-  width: 64px;
-  height: 64px;
-  background: var(--red-brand);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.8rem;
-  color: #ffffff;
-  box-shadow: 0 4px 16px rgba(217, 26, 42, 0.4);
-  transition: 0.25s;
-  border: none;
-  cursor: pointer;
-  position: relative;
-  z-index: 2;
+    pointer-events: auto !important; /* MUDANÇA: Botão captura o clique */
+    background: var(--red-brand);
+    color: white;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s;
 }
+
+/* Quando o banner de cookies fechar, adicionaremos a classe 'show' via JS */
+.chatbot-widget.show {
+    visibility: visible;
+    opacity: 1;
+}
+
+/* O banner de cookies precisa ter um z-index menor que o chat */
+.cookie-banner {
+    z-index: 99998 !important;
+}
+
+
+.chat-label {
+    background: #ffffff !important;
+    color: #333 !important;
+    padding: 10px 18px !important;
+    border-radius: 20px !important;
+    font-size: 0.85rem !important;
+    font-weight: 800 !important;
+    margin-right: 12px !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15) !important;
+    border: 1px solid #eee !important;
+    white-space: nowrap !important;
+    display: block !important;
+}
+
 .chatbot-toggle:hover {
-  transform: scale(1.1);
+    transform: scale(1.1);
 }
 
 /* Ajuste para evitar tela branca e permitir estrutura interna */
 .chatbot-window {
   position: absolute;
-  bottom: 80px; /* Distância acima do botão */
+  bottom: 80px;
   right: 0;
-  width: 320px;
-  height: 450px;
+  width: 420px !important; /* Força bruta para garantir a largura */
+  height: 600px !important; /* Força bruta para garantir a altura */
+  max-height: 80vh;
   background: #ffffff;
   border-radius: 16px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
@@ -1204,16 +1493,39 @@ a.whatsapp-float:hover {
   pointer-events: all;
 }
 
-.chat-header {
-  padding: 16px 20px;
-  background: var(--red-brand);
-  color: #ffffff;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  border-radius: 16px 16px 0 0;
-  flex-shrink: 0;
+/* Proteção para Celulares (Smartphones) */
+@media (max-width: 768px) {
+  .chatbot-window {
+    width: calc(100vw - 40px); /* Quase a tela toda, com margem de 20px de cada lado */
+    height: 75vh;
+    right: 20px; /* Alinha certinho no mobile */
+  }
 }
+
+
+/* 1. A moldura branca que separa o chat do site */
+.chatbot-window {
+  border: 2px solid #ffffff !important; 
+  box-shadow: 0 15px 45px rgba(0, 0, 0, 0.4) !important; /* Sombra mais forte */
+}
+
+/* 2. O cabeçalho com gradiente premium para não brigar com a navbar */
+.chatbot-window .chat-header {
+  background: linear-gradient(135deg, var(--red-brand), #8b0015) !important;
+  color: #ffffff !important;
+  padding: 16px 20px !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 12px !important;
+  border-bottom: 2px solid #6b0010 !important;
+}
+
+/* 3. Voltando o texto para branco */
+.chatbot-window .chat-info strong,
+.chatbot-window .chat-info small {
+  color: #ffffff !important;
+}
+
 .chat-avatar {
   background: #ffffff;
   color: var(--red-brand);
@@ -1489,90 +1801,17 @@ a.whatsapp-float:hover {
   white-space: nowrap; /* Impede que o texto quebre em duas linhas */
 }
 
-/* Garante que o ícone não fique esmagado */
-.social-btn i {
-  font-size: 1.2rem;
-  display: inline-block;
-}
-
-/* Mantém as cores que já definimos */
-.social-btn.instagram {
-  background: radial-gradient(
-    circle at 30% 107%,
-    #fdf497 0%,
-    #fdf497 5%,
-    #fd5949 45%,
-    #d6249f 60%,
-    #285aeb 90%
-  ) !important;
-}
-
-.social-btn.whatsapp {
-  background-color: #25d366 !important;
-}
-
-/* Container principal */
-.chatbot-widget {
-  position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
-  display: flex;
-  align-items: center;
-
-  .chatbot-toggle:hover {
-    transform: scale(1.1);
-    filter: brightness(1.1);
-  }
-
-  /* IMPORTANTE: Mude para 'all' para o mouse ser detectado */
-  pointer-events: none;
-}
-
-.chatbot-toggle,
-.chat-label,
-.chatbot-window {
-  pointer-events: all; /* Devolve o clique para os elementos internos */
-}
-
-/* O balão de texto */
-.chat-label {
-  background: #ffffff;
-  color: #333;
-  padding: 10px 18px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 800;
-  margin-right: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
-  border: 1px solid #eee;
-  white-space: nowrap;
-  position: relative;
-  animation: floatChat 3s ease-in-out infinite;
-}
-
-/* A setinha do balão */
-.chat-label::after {
-  content: "";
-  position: absolute;
-  right: -8px;
-  top: 50%;
-  transform: translateY(-50%);
-  border-top: 8px solid transparent;
-  border-bottom: 8px solid transparent;
-  border-left: 8px solid #ffffff;
-}
-
-/* ─── HERO COM VÍDEO, BOTÃO E CATEGORIAS ─── */
+/* ─── HERO COM VÍDEO (Vídeo Limpo e Ajustado) ─── */
 .hero-video {
   position: relative;
-  height: 65vh; /* Altura ideal */
+  height: 75vh; /* 85% da tela, para o usuário já ver o começo do cardápio lá embaixo */
   min-height: 450px;
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
-  padding-top: 0; /* Remove o espaço extra no topo */
+  padding-top: 0;
+  background: #000;
 }
 
 .bg-video {
@@ -1591,12 +1830,7 @@ a.whatsapp-float:hover {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(
-    0,
-    0,
-    0,
-    0.4
-  ); /* Deixa o vídeo um pouco escuro para destacar o botão */
+  background: rgba(0, 0, 0, 0.4);
   z-index: 2;
 }
 
@@ -1605,41 +1839,29 @@ a.whatsapp-float:hover {
   z-index: 3;
 }
 
-/* ─── CATEGORIAS FLUTUANDO ─── */
-.categorias-sobre-video {
-  position: absolute;
-  bottom: 20px; /* Gruda na parte de baixo do vídeo */
-  left: 0;
-  width: 100%;
-  z-index: 4;
+/* ══════════════════════════════════════
+   FILTROS DO CARDÁPIO (Abaixo do Título)
+══════════════════════════════════════ */
+/* Esta é a nova classe que alinha os botões junto com as esfirras */
+.categorias-filtros {
+    width: 100%;
+    padding: 0 0 40px 0;
+    position: relative;
 }
 
-.categorias-sobre-video .categorias-inner {
-  max-width: 1220px;
-  margin: 0 auto;
-  padding: 10px 28px;
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scrollbar-width: none;
-  justify-content: center; /* Centraliza as opções */
+.categorias-filtros .categorias-inner {
+    max-width: 1220px;
+    margin: 0 auto;
+    padding: 10px 28px;
+    display: flex;
+    gap: 12px;
+    justify-content: center; /* Centraliza perfeitamente no desktop */
+    flex-wrap: wrap; /* Garante que os botões quebrem de linha se a tela for menor */
 }
 
-/* Estilo para as opções (pílulas) darem leitura em cima do vídeo */
-.categorias-sobre-video .cat-pill {
-  background: rgba(255, 255, 255, 0.95);
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  border: none;
-  font-weight: 800;
-}
-
-.categorias-sobre-video .cat-pill.active {
-  background: var(--red-brand);
-  color: #ffffff;
-}
-
-.categorias-sobre-video .cat-pill:hover {
-  background: #f1f1f1;
+/* Reduz o espaço gigante que existia abaixo do título para os botões ficarem próximos */
+.cardapio-header {
+    margin-bottom: 25px !important;
 }
 
 /* Esconde o balão quando o chat estiver aberto */
@@ -1660,12 +1882,12 @@ a.whatsapp-float:hover {
 }
 
 /* CHATBOT - Overrides isolados */
-
 #chatbotWindow.chatbot-window,
 #chatbotWindow .chatbot-window,
 #chatbotWindow {
-  width: 360px !important;
-  height: 500px !important;
+  width: 420px !important;  /* Aumentamos a largura aqui */
+  height: 650px !important; /* Aumentamos a altura aqui */
+  max-height: 85vh !important; /* Trava de segurança para telas pequenas */
 }
 
 /* Mensagens */
@@ -1823,3 +2045,232 @@ a.whatsapp-float:hover {
   font-weight: 700;
   color: var(--text-main);
 }
+
+/* ══════════════════════════════════════
+   BANNER LGPD / COOKIES
+══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   BANNER LGPD / COOKIES (Ajuste de camada)
+══════════════════════════════════════ */
+.cookie-banner {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    background-color: #1a1a1a;
+    color: #f1f1f1;
+    padding: 20px;
+    z-index: 99998 !important; /* MUDANÇA: Menor que 999999 do chat */
+    pointer-events: auto !important; /* Garante que você pode clicar em Aceitar/Recusar */
+    box-shadow: 0 -4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.cookie-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+    padding-right: 220px; /* Empurra os botões para a esquerda, fugindo do chatbot */
+}
+
+.cookie-content p {
+    margin: 0;
+    font-size: 0.9rem;
+    line-height: 1.4;
+}
+
+/* Container dos botões */
+.cookie-actions {
+    display: flex;
+    gap: 10px;
+}
+
+/* Botão Aceitar */
+.btn-cookie {
+    background-color: #e4002b;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background 0.3s, transform 0.2s;
+}
+
+.btn-cookie:hover {
+    background-color: #b30022;
+    transform: translateY(-2px);
+}
+
+/* Botão Recusar (Estilo mais discreto) */
+.btn-cookie-outline {
+    background: transparent;
+    color: #ffffff;
+    border: 1px solid #444;
+    padding: 10px 24px;
+    border-radius: 6px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.btn-cookie-outline:hover {
+    background: #333;
+    border-color: #555;
+}
+
+/* Responsivo para celular */
+@media (max-width: 768px) {
+    .cookie-content {
+        flex-direction: column;
+        text-align: center;
+        padding-right: 0; /* Remove o recuo lateral do PC */
+        padding-bottom: 80px; /* Dá espaço embaixo para o botão do chat não cobrir o Aceitar/Recusar */
+    }
+    .cookie-actions {
+        width: 100%;
+        flex-direction: column;
+    }
+    .btn-cookie, .btn-cookie-outline {
+        width: 100%;
+    }
+}
+
+/* Elevação dos botões do cardápio ao passar o mouse */
+.produtos-grid .btn, 
+.produtos-grid button {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.produtos-grid .btn:hover, 
+.produtos-grid button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Animação de flutuação para a imagem de destaque */
+@keyframes flutuacaoPremium {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0px); }
+}
+
+.sobre-vitrine img {
+    animation: flutuacaoPremium 4s ease-in-out infinite;
+}
+
+/* Sombreamento para destacar as pílulas de navegação sobre o vídeo */
+.cat-pill {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* --- Seção Sobre Nós (Layout Premium) --- */
+.sobre-layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 60px;
+    align-items: center;
+}
+
+/* O título elegante usando a fonte serifada do projeto (Fraunces) */
+.sobre .section-title {
+    font-family: 'Fraunces', serif; /* Use a fonte serifada que já existe no seu header */
+    font-weight: 800;
+    font-size: 3.2rem;
+    line-height: 1.1;
+    color: var(--text-main, #333333);
+    margin-bottom: 25px;
+}
+
+/* A pequena linha decorativa */
+.sobre-divider {
+    width: 60px;
+    height: 4px;
+    background: var(--red-brand);
+    margin-bottom: 40px;
+}
+
+/* A Grid de Itens (Features) */
+.feat-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 25px;
+}
+
+.feat-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+}
+
+.feat-icon {
+    font-size: 2rem;
+    line-height: 1;
+    margin-top: 3px;
+}
+
+.feat-copy strong {
+    display: block;
+    font-family: 'Jakarta Sans', sans-serif;
+    font-weight: 800;
+    font-size: 1.1rem;
+    color: var(--text-main, #333333);
+    margin-bottom: 4px;
+}
+
+.feat-copy p {
+    font-family: 'Jakarta Sans', sans-serif;
+    font-weight: 400; /* Peso fino para contraste premium */
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: #666666;
+    margin: 0;
+}
+
+/* Efeito de Interação no Botão Finalizar Pedido */
+.btn-finalizar {
+  transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease !important;
+}
+
+.btn-finalizar:hover {
+  background: #b30022 !important; /* Um tom de vermelho um pouco mais fechado */
+  transform: translateY(-3px) !important; /* Levanta o botão */
+  box-shadow: 0 8px 20px rgba(228, 0, 43, 0.4) !important; /* Cria um "brilho" vermelho ao redor */
+}
+
+.btn-finalizar:active {
+  transform: translateY(0) !important; /* Efeito de afundar ao clicar */
+}
+
+/* ══════════════════════════════════════
+   TEXTO HERO (Glassmorphism Premium)
+══════════════════════════════════════ */
+/* ══════════════════════════════════════
+   TEXTO HERO (Foco Total no Vídeo)
+══════════════════════════════════════ */
+.hero-content {
+    background: transparent !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    display: block;
+    text-align: center;
+}
+
+.hero-title {
+    /* Cria uma "fumaça" escura apenas atrás das letras para garantir a leitura */
+    text-shadow: 0 4px 24px rgba(0, 0, 0, 0.9), 0 2px 8px rgba(0, 0, 0, 0.8) !important;
+    margin-bottom: 15px !important;
+}
+
+.hero-sub {
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.9) !important;
+    font-weight: 600;
+}
+
